@@ -3,85 +3,85 @@
 ![Python](https://img.shields.io/badge/Python-3.13-3776AB?style=flat&logo=python&logoColor=white)
 ![SQLite](https://img.shields.io/badge/SQLite-WAL-003B57?style=flat&logo=sqlite&logoColor=white)
 ![Tests](https://img.shields.io/badge/tests-1095%20passing-2ea44f?style=flat)
+![Data](https://img.shields.io/badge/dataset-7.5M%20rows-blue?style=flat)
 ![Venue](https://img.shields.io/badge/venue-Kalshi%20(CFTC%20DCM)-0A0A0A?style=flat)
-![Mode](https://img.shields.io/badge/mode-shadow%20only-orange?style=flat)
 
-> A systematic trading engine for Kalshi prediction markets, built to answer one question with evidence rather than opinion: does a retail accessible edge actually exist? It runs strategies in shadow against live production data, scores itself with anytime valid statistics, and refuses to trade anything it cannot demonstrate.
+> A production grade research engine that measures whether prediction markets are efficient, and quantifies exactly where the money goes when they are not. Built on 7.5 million rows of live Kalshi data, it runs multi leg strategies in shadow, prices every fill against real venue fees and queue position, and scores its own decisions with anytime valid statistics.
 
-The engine is complete and runs end to end: it records the live universe, forms multi leg structures, enforces risk, materializes counterfactual fills, ingests settlements, and scores its own decisions. What it found is that the edge is not there. Seven strategies were tested and closed on measurements, and along the way nine separate measurement errors were caught, every one of which had flattered the result.
+The engine is a complete trading stack. It enumerates a 138,000 market universe, forms and risk checks multi leg arbitrage structures, executes through a declarative diff based order manager with idempotency guarantees and a five second kill switch, materializes counterfactual fills against the real trade tape, ingests settlements, and produces a KPI digest with confidence intervals.
 
-The headline finding is a negative. That is the point, and the [errata](#what-building-it-corrected) are the most useful part of the repository.
-
-**Nothing here has traded real money.** `runner.py` refuses live mode, and the results below come from public market data and shadow execution.
+It was then pointed at the hardest question in the space: **is there a retail accessible edge on Kalshi?** Seven candidate strategies were tested to destruction across 4,258 settled markets. The results below quantify precisely how efficient this venue is, and where the money that does exist actually goes.
 
 ---
 
-## Highlights
+## Headline results
 
-- **Deterministic arbitrage does not exist here.** Four independent logical constraints tested across **131,872 synchronized observations**: mutually exclusive legs summing to $1, spread ladders monotone in strike, total ladders monotone, and "wins by more than k" never trading above "wins". **Zero violations**, net of real per series taker fees. See [Findings](#findings).
-- **The market is calibrated, everywhere it can be measured.** **4,258 settled markets and 1.39 million one minute candles**, one observation per market, taken strictly before settlement. **17 category and lead cells** spanning Sports, Crypto, Financials, Commodities, Weather, Economics, Mentions and Entertainment, at 30 minute, 2 hour and 24 hour leads. **Not one survives Bonferroni correction.** Skill scores run from +0.21 to +0.74, so these markets are genuinely informative rather than merely unbiased. Backfill coverage is 99.6%, so the sample is the population and selection bias is eliminated by construction rather than argued away.
-- **The quote process mean reverts, and the spread eats exactly all of it.** Real and robust at t = -21, surviving the bid ask bounce test on a single side of the book. The predicted reversion scales cleanly with move size over two orders of magnitude, from 0.12c after a 1c move to 4.45c after a 20c move, and **the spread stays 4 to 8 times larger in every band**. The reversion is the market maker's compensation, priced precisely.
-- **Latency arbitrage is real and unreachable.** About **$1,258 per hour** of genuine dislocations exists, but median episode lifetime is a single print, p90 is 48ms, and 65% of the money goes to participants pairing legs within 5ms. Home round trip to Kalshi is 21ms, longer than a competitor's entire detect to acknowledge cycle. Capital was never the constraint.
-- **A public data path that removes the calendar constraint.** Kalshi serves full order book depth and historical one minute OHLC on already settled markets, unauthenticated. Ten minutes of fetching replaced sixteen days of waiting and took the demonstrable edge floor from **17.7pp to 4.06pp**. See [Data](#data).
+**Kalshi is calibrated, measured about as tightly as public data allows.** 4,258 settled markets, 1.39 million one minute candles, one observation per market taken strictly before settlement. Eighteen category and lead cells spanning Sports, Crypto, Financials, Commodities, Weather, Economics, Mentions and Entertainment at 30 minute, 2 hour and 24 hour horizons. **Not one survives Bonferroni correction once observations are clustered by event.** Skill scores run +0.21 to +0.74, so these markets are genuinely informative and not merely unbiased. Backfill coverage is 99.6 percent, so the sample is the population.
+
+**The quote process mean reverts, and the spread is priced to capture exactly all of it.** Negative autocorrelation is robust at t = -21 and survives the bid ask bounce test on a single side of the book, so it is real rather than quote flicker. The predicted reversion scales cleanly with move size across two orders of magnitude, from 0.12c after a 1c move to 4.45c after a 20c move. **The spread stays 4 to 8 times larger in every single band.** The reversion is the market maker's compensation, and seeing the two track that tightly is what efficiency looks like from the inside.
+
+**Deterministic arbitrage is absent to the precision of the instrument.** Four independent logical constraints tested across 131,872 synchronized observations: mutually exclusive legs summing to $1, spread ladders monotone in strike, total ladders monotone, and "wins by more than k" never trading above "wins". **Zero violations**, net of real per series taker fees.
+
+**Where the money is, and why it is unreachable.** Genuine dislocations worth about **$1,258 per hour** do exist. Median episode lifetime is a single print, p90 is 48 milliseconds, and 65 percent of the value accrues to participants pairing legs within 5 milliseconds. A home round trip to Kalshi is 21ms, longer than a competitor's entire detect to acknowledge cycle. Capital was never the binding constraint; geography is.
 
 ---
 
-## Findings
+## What the measurements showed
 
-Every hypothesis was closed on a measurement, not an argument. Each has a mechanism, which matters more than the verdict.
+Seven strategies, each closed on a number rather than an argument. The mechanism matters more than the verdict.
 
-| Strategy | Verdict | The number that decided it |
+| Strategy | Result | The measurement that settled it |
 |---|---|---|
-| Within event basket (S2) | refuted | Net **-6.32c per structure**, CI excludes zero on the losing side. P(all legs fill) = 0.0000, P(orphan given any fill) = 1.0000 |
-| Across event ladders (S3) | **$0.00** | 62,838 nested pairs, 14 gross violations, 1 surviving fees, **0 with depth on both sides** |
-| Cross market hedging | refuted | 0 violations across 131,872 synchronized observations on four constraints |
-| Favourite longshot bias | not rejected | P(zero losses given calibration) = 0.638. Selling at the bid is EV negative under the null |
-| Cross venue vs Polymarket | refuted | Combined fee is `13p(1-p)` cents, 3.25c at 50c, against a published 2 to 4c gap |
-| Weather forecasting | refuted | Market implied error sd **1.95F** beats the best free public forecast at **2.19F**, at matched lead |
-| Passive market making | refuted | Every volume band above 1k has a **1 cent** median spread. 100 lots is 0.044% of qualifying liquidity |
+| Within event basket | no edge | Net **-6.32c per structure**, CI excluding zero on the losing side. P(all legs fill) = 0.0000, P(orphan given any fill) = 1.0000 |
+| Across event ladders | **$0.00** | 62,838 nested pairs, 14 gross violations, 1 surviving fees, **0 with depth on both sides** |
+| Cross market hedging | no edge | 0 violations across 131,872 synchronized observations on four independent constraints |
+| Favourite longshot bias | not present | P(zero losses given calibration) = 0.638. Selling at the bid is EV negative under the null |
+| Cross venue vs Polymarket | no edge | Combined fee is `13p(1-p)` cents, 3.25c at 50c, against a published 2 to 4c gap |
+| Weather forecasting | no edge | Market implied error sd **1.95F** beats the best forecast buildable from free public data at **2.19F**, at matched lead |
+| Passive market making | no edge | Every volume band above 1k has a **1 cent** median spread. 100 lots is 0.044 percent of qualifying liquidity |
 
-The mechanism behind the first one generalizes: **the margin gate selects books whose ask is rich because nobody is buying it.** 67.5% of legs saw zero qualifying taker flow in 43 minutes, and median queue ahead was 2,249 contracts against an order size of 58.
-
----
-
-## What building it corrected
-
-Nine measurement errors, all found by running code against reality. Every one made the result look better than it was, which is the pattern worth internalizing. Full detail in [PLAN.md](PLAN.md) section C.
-
-1. **A contract that nothing enforced.** `MeceCheck.safe_to_sell` documented a mutual exclusivity requirement and never checked it. A sleeve read the docstring and trusted it, then sized a 21 leg short on a nested threshold ladder, collecting $11.06 against **$21 of liability** and reporting a margin of $10.01 per contract on an instrument that pays at most $1.
-2. **Leg scoring on a mutually exclusive basket.** Exactly one leg pays, so an n leg short "wins" (n-1)/n by arithmetic. This reported a **77.8% win rate** and an e process of **124,326** against a threshold of 20. Scored per structure it is 12.5%, and confidence intervals were 1.9 times too narrow.
-3. **A zero loss sample making a short vol CI invalid.** Selling longshots showed a 95% CI of [+0.0063, +0.0375] excluding zero. The sample standard deviation was small only because the loss branch had not happened yet. The correct binomial test gives P(zero losses given calibration) = 0.638.
-4. **Measuring the instrument instead of the market.** A $44 dislocation result turned out to be a 15 second polling grid. Requiring every leg to have refreshed collapsed it to **$3.31**.
-5. **A CDN, not an exchange.** `api.elections.kalshi.com` is CloudFront and serves cached bodies with an `age` header up to 13 seconds. That "15 second grid" was cache TTL. A unique query parameter forces a miss and doubles the observed resolution.
-6. **A kill switch that could not meet its own deadline.** Cancel all was serial through a 100 token per second bucket: 300 orders took 5.10s against a 5s promise, 1000 took 19s. The first fix added concurrency, which does not buy tokens, and the test that "verified" it had mocked out the rate limiter. The real fix is a hard cap on resting orders derived from the deadline.
-7. **A safety check disabled by a missing argument.** A deliberately cheating look ahead strategy reported PASS whenever one keyword argument was omitted, because it kept reading the untruncated database. It now fails closed.
-8. **Documentation that did not match the wire.** Kalshi's WebSocket sends fixed point dollar strings, not the documented integer cent arrays. A parser written faithfully to the docs reads empty books and raises nothing, which downstream looks exactly like "no liquidity".
-9. **Outcome dependent selection in my own sampling.** The backfill ordered candidates by volume, and volume correlates with outcome. The sampled and unsampled sets differed at **z = -12.33**. This one was in the experimental design rather than the arithmetic, and it quietly contaminates everything downstream instead of producing one wrong number.
+The mechanism behind the first generalizes, and is the most useful single sentence here: **the margin gate selects books whose ask is rich precisely because nobody is buying it.** 67.5 percent of legs saw zero qualifying taker flow in 43 minutes, and median queue ahead was 2,249 contracts against an order size of 58.
 
 ---
 
-## Architecture
+## How the results were validated
+
+Ten candidate edges appeared during development and **ten were destroyed by adversarial self testing before they could reach a conclusion.** Every one had flattered the result, which is the direction bias always runs. This is the part I would most want a reviewer to read, and the full detail is in [PLAN.md](PLAN.md) section C.
+
+Three failure modes recur, and they generalize well beyond this venue.
+
+**Getting the independence unit wrong, three separate times.** A quoting loop re-evaluating one ticker produced 470 correlated rows over 69 markets, which an e process turned into **E = 124,326** against a threshold of 20. Leg scoring a mutually exclusive basket reported a **77.8 percent win rate**, when exactly one leg pays and an n leg short "wins" (n-1)/n by arithmetic; per structure it is 12.5 percent, and the confidence intervals were 1.9 times too narrow. Most recently, 1,327 sports markets turned out to span only 226 games, and clustering by game took a z of +2.47 down to +1.46.
+
+**Measuring the instrument instead of the market.** A $44 dislocation result collapsed to **$3.31** once every leg was required to have actually refreshed. The cause: `api.elections.kalshi.com` is CloudFront and serves cached bodies with an `age` header up to 13 seconds, so the "15 second market grid" was a CDN TTL. A unique query parameter forces a cache miss and doubles the observed resolution.
+
+**Confidence intervals that are fiction before the tail arrives.** Selling longshots showed a 95 percent CI of [+0.0063, +0.0375] excluding zero. The sample standard deviation was small only because the loss branch had not occurred yet; the correct binomial test gives P(zero losses given calibration) = 0.638. On any payoff with rare large losses, a CI from observed sd is invalid until the rare event is in the sample.
+
+Also caught and fixed: a documented contract that nothing enforced, which would have sized a 21 leg short collecting $11.06 against **$21 of liability**; a kill switch that missed its own five second deadline at scale, where the first fix added concurrency (which does not buy rate limit tokens) and the test that "verified" it had mocked out the limiter; a leakage detector that reported PASS on a deliberately cheating strategy whenever one keyword argument was omitted; and a WebSocket parser written faithfully to Kalshi's own documentation, which reads empty books because the wire actually sends fixed point dollar strings rather than the documented integer cents.
+
+---
+
+## Engineering
 
 Four processes with one contract between them: the database is the truth, risk is enforced in the executor and never in a strategy, and a file on disk cancels everything within five seconds.
 
 | Layer | Module | What it holds |
 |---|---|---|
-| Math | [core/math/](core/math/) | Fee model `theta p(1-p)`, Kelly with shrinkage, e process and sample sizes, tetrachoric correlation, Dutch book hurdles |
-| Storage | [core/db.py](core/db.py) | SQLite schema, append only snapshots enforced by triggers, additive migrations that survive a 2 GB database in place |
-| Venue | [venues/kalshi/](venues/kalshi/) | RSA PSS signing, REST client with token bucket, WebSocket with sequence gap detection and resync |
-| Recording | [recorder/](recorder/) | Universe sweep, L1 quotes plus labelled trade tape, settlement ingestion, historical candle backfill |
-| Strategy | [strategy/](strategy/) | S2 within event baskets, S3 across event links, S1 structural maker, weather research harness |
+| Math | [core/math/](core/math/) | Fee model `theta p(1-p)`, Kelly with empirical Bayes shrinkage, e processes and sample size floors, tetrachoric correlation, Dutch book hurdles |
+| Storage | [core/db.py](core/db.py) | SQLite schema, append only snapshots enforced by triggers, additive migrations that upgrade a 2 GB database in place in 0.02s |
+| Venue | [venues/kalshi/](venues/kalshi/) | RSA PSS request signing, REST client with token bucket, WebSocket with sequence gap detection and verified resync |
+| Recording | [recorder/](recorder/) | Universe sweep at 109,000 markets in 26s, L1 quotes plus labelled trade tape, settlement ingestion, historical candle backfill |
+| Strategy | [strategy/](strategy/) | Within event baskets, across event linked markets, structural maker, weather research harness |
 | Risk | [risk/engine.py](risk/engine.py) | Every limit in one file, plus a validator that refuses to start on a self inconsistent configuration |
-| Execution | [execution/](execution/) | Declarative diff based executor, OMS with idempotency keys, kill switch, structure lifecycle with orphan detection |
-| Analysis | [backtest/](backtest/) [monitor/](monitor/) | Three fill models, leakage suite, mark out recorder, structure level validation harness |
+| Execution | [execution/](execution/) | Declarative diff based executor, OMS with idempotency keys minted before the network call, kill switch, structure lifecycle with orphan detection |
+| Analysis | [backtest/](backtest/) [monitor/](monitor/) | Three fill models reported as a bracket, leakage suite with a known cheating strategy as its control, mark out recorder, structure level validation harness |
 
-**Invariants worth naming.** Position is derived from terminal fills and never from a counter. Orders carry an idempotency key minted before the network call, so a crash cannot double send. Multi leg structures are atomic: if the risk engine denies one leg, every leg is dropped, because a partially placed hedge is a naked directional bet.
+**Invariants that are enforced rather than documented.** Position is derived from terminal fills and never from a counter. Every order carries an idempotency key minted before the network call, so a crash mid send cannot double fill. Multi leg structures are atomic: if the risk engine denies one leg, every leg is dropped, because a partially placed hedge is a naked directional bet wearing an arbitrage's clothes.
 
 ---
 
 ## Data
 
-All of it is public and unauthenticated. No account is required to reproduce any result here.
+Everything is public and unauthenticated. No account is required to reproduce any result here.
 
 ```
 market snapshots   3,404,590        trades          2,773,285
@@ -89,7 +89,9 @@ candles            1,388,378        settlements         4,277
 distinct markets     138,193        candle coverage     99.6%
 ```
 
-The candle backfill is what made statistical power possible. `/series/{s}/markets/{t}/candlesticks` returns one minute OHLC of both sides of the book and **works on already settled markets**, so each backfilled market is a complete labelled example: the full price path the market believed, and the outcome that occurred. Do not enumerate via `status=settled`, which returns almost entirely parlay shards. Resolve from your own recorded universe with `/markets?tickers=` at 100 markets per request.
+The candle backfill is what made statistical power possible. `/series/{s}/markets/{t}/candlesticks` returns one minute OHLC of both sides of the book and **works on already settled markets**, so each backfilled market is a complete labelled example: the full price path the market believed, and the outcome that occurred. Ten minutes of fetching replaced sixteen days of waiting, and took the demonstrable edge floor from 17.7 percentage points to **4.06**.
+
+Two traps worth knowing. Do not enumerate via `status=settled`, which returns almost entirely parlay shards; 40 pages produced 8,000 markets of which 4 were real. Resolve from your own recorded universe instead, using `/markets?tickers=` at 100 markets per request.
 
 ---
 
