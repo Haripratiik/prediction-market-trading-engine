@@ -1,147 +1,122 @@
-# predictionMarkets
+# Prediction Trading Engine
 
-Building a systematic prediction market trading operation (US / Georgia based).
+![Python](https://img.shields.io/badge/Python-3.13-3776AB?style=flat&logo=python&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-WAL-003B57?style=flat&logo=sqlite&logoColor=white)
+![Tests](https://img.shields.io/badge/tests-1095%20passing-2ea44f?style=flat)
+![Venue](https://img.shields.io/badge/venue-Kalshi%20(CFTC%20DCM)-0A0A0A?style=flat)
+![Mode](https://img.shields.io/badge/mode-shadow%20only-orange?style=flat)
 
-## Status
+> A systematic trading engine for Kalshi prediction markets, built to answer one question with evidence rather than opinion: does a retail accessible edge actually exist? It runs strategies in shadow against live production data, scores itself with anytime valid statistics, and refuses to trade anything it cannot demonstrate.
 
-**Phase A + venue layer + recorder + shadow engine.** 206 tests pass (offline + live public API + authenticated demo).
+The engine is complete and runs end to end: it records the live universe, forms multi leg structures, enforces risk, materializes counterfactual fills, ingests settlements, and scores its own decisions. What it found is that the edge is not there. Seven strategies were tested and closed on measurements, and along the way nine separate measurement errors were caught, every one of which had flattered the result.
 
-```bash
-python -m pytest                    # everything
-python -m pytest -m "not live"      # offline only
-python -m recorder.main --once      # sweep the universe into data/pm.db
-python -m scripts.screen_universe   # run the MECE gate over what was recorded
+The headline finding is a negative. That is the point, and the [errata](#what-building-it-corrected) are the most useful part of the repository.
+
+**Nothing here has traded real money.** `runner.py` refuses live mode, and the results below come from public market data and shadow execution.
+
+---
+
+## Highlights
+
+- **Deterministic arbitrage does not exist here.** Four independent logical constraints tested across **131,872 synchronized observations**: mutually exclusive legs summing to $1, spread ladders monotone in strike, total ladders monotone, and "wins by more than k" never trading above "wins". **Zero violations**, net of real per series taker fees. See [Findings](#findings).
+- **The market is calibrated.** Measured on **940 settled markets and 435,936 one minute candles**, one observation per market. z scores of -0.76, +1.31 and +1.34 at 5, 30 and 120 minute leads. No price bucket survives Bonferroni correction. Brier 0.1748 against 0.2438 for a constant forecast, so it is genuinely informative and not merely unbiased.
+- **The quote process mean reverts, and the spread eats exactly all of it.** Real and robust at t = -21, surviving the bid ask bounce test on a single side of the book. The predicted reversion scales cleanly with move size over two orders of magnitude, from 0.12c after a 1c move to 4.45c after a 20c move, and **the spread stays 4 to 8 times larger in every band**. The reversion is the market maker's compensation, priced precisely.
+- **Latency arbitrage is real and unreachable.** About **$1,258 per hour** of genuine dislocations exists, but median episode lifetime is a single print, p90 is 48ms, and 65% of the money goes to participants pairing legs within 5ms. Home round trip to Kalshi is 21ms, longer than a competitor's entire detect to acknowledge cycle. Capital was never the constraint.
+- **A public data path that removes the calendar constraint.** Kalshi serves full order book depth and historical one minute OHLC on already settled markets, unauthenticated. Ten minutes of fetching replaced sixteen days of waiting and took the demonstrable edge floor from **17.7pp to 4.06pp**. See [Data](#data).
+
+---
+
+## Findings
+
+Every hypothesis was closed on a measurement, not an argument. Each has a mechanism, which matters more than the verdict.
+
+| Strategy | Verdict | The number that decided it |
+|---|---|---|
+| Within event basket (S2) | refuted | Net **-6.32c per structure**, CI excludes zero on the losing side. P(all legs fill) = 0.0000, P(orphan given any fill) = 1.0000 |
+| Across event ladders (S3) | **$0.00** | 62,838 nested pairs, 14 gross violations, 1 surviving fees, **0 with depth on both sides** |
+| Cross market hedging | refuted | 0 violations across 131,872 synchronized observations on four constraints |
+| Favourite longshot bias | not rejected | P(zero losses given calibration) = 0.638. Selling at the bid is EV negative under the null |
+| Cross venue vs Polymarket | refuted | Combined fee is `13p(1-p)` cents, 3.25c at 50c, against a published 2 to 4c gap |
+| Weather forecasting | refuted | Market implied error sd **1.95F** beats the best free public forecast at **2.19F**, at matched lead |
+| Passive market making | refuted | Every volume band above 1k has a **1 cent** median spread. 100 lots is 0.044% of qualifying liquidity |
+
+The mechanism behind the first one generalizes: **the margin gate selects books whose ask is rich because nobody is buying it.** 67.5% of legs saw zero qualifying taker flow in 43 minutes, and median queue ahead was 2,249 contracts against an order size of 58.
+
+---
+
+## What building it corrected
+
+Nine measurement errors, all found by running code against reality. Every one made the result look better than it was, which is the pattern worth internalizing. Full detail in [PLAN.md](PLAN.md) section C.
+
+1. **A contract that nothing enforced.** `MeceCheck.safe_to_sell` documented a mutual exclusivity requirement and never checked it. A sleeve read the docstring and trusted it, then sized a 21 leg short on a nested threshold ladder, collecting $11.06 against **$21 of liability** and reporting a margin of $10.01 per contract on an instrument that pays at most $1.
+2. **Leg scoring on a mutually exclusive basket.** Exactly one leg pays, so an n leg short "wins" (n-1)/n by arithmetic. This reported a **77.8% win rate** and an e process of **124,326** against a threshold of 20. Scored per structure it is 12.5%, and confidence intervals were 1.9 times too narrow.
+3. **A zero loss sample making a short vol CI invalid.** Selling longshots showed a 95% CI of [+0.0063, +0.0375] excluding zero. The sample standard deviation was small only because the loss branch had not happened yet. The correct binomial test gives P(zero losses given calibration) = 0.638.
+4. **Measuring the instrument instead of the market.** A $44 dislocation result turned out to be a 15 second polling grid. Requiring every leg to have refreshed collapsed it to **$3.31**.
+5. **A CDN, not an exchange.** `api.elections.kalshi.com` is CloudFront and serves cached bodies with an `age` header up to 13 seconds. That "15 second grid" was cache TTL. A unique query parameter forces a miss and doubles the observed resolution.
+6. **A kill switch that could not meet its own deadline.** Cancel all was serial through a 100 token per second bucket: 300 orders took 5.10s against a 5s promise, 1000 took 19s. The first fix added concurrency, which does not buy tokens, and the test that "verified" it had mocked out the rate limiter. The real fix is a hard cap on resting orders derived from the deadline.
+7. **A safety check disabled by a missing argument.** A deliberately cheating look ahead strategy reported PASS whenever one keyword argument was omitted, because it kept reading the untruncated database. It now fails closed.
+8. **Documentation that did not match the wire.** Kalshi's WebSocket sends fixed point dollar strings, not the documented integer cent arrays. A parser written faithfully to the docs reads empty books and raises nothing, which downstream looks exactly like "no liquidity".
+9. **Outcome dependent selection in my own sampling.** The backfill ordered candidates by volume, and volume correlates with outcome. The sampled and unsampled sets differed at **z = -12.33**. This one was in the experimental design rather than the arithmetic, and it quietly contaminates everything downstream instead of producing one wrong number.
+
+---
+
+## Architecture
+
+Four processes with one contract between them: the database is the truth, risk is enforced in the executor and never in a strategy, and a file on disk cancels everything within five seconds.
+
+| Layer | Module | What it holds |
+|---|---|---|
+| Math | [core/math/](core/math/) | Fee model `theta p(1-p)`, Kelly with shrinkage, e process and sample sizes, tetrachoric correlation, Dutch book hurdles |
+| Storage | [core/db.py](core/db.py) | SQLite schema, append only snapshots enforced by triggers, additive migrations that survive a 2 GB database in place |
+| Venue | [venues/kalshi/](venues/kalshi/) | RSA PSS signing, REST client with token bucket, WebSocket with sequence gap detection and resync |
+| Recording | [recorder/](recorder/) | Universe sweep, L1 quotes plus labelled trade tape, settlement ingestion, historical candle backfill |
+| Strategy | [strategy/](strategy/) | S2 within event baskets, S3 across event links, S1 structural maker, weather research harness |
+| Risk | [risk/engine.py](risk/engine.py) | Every limit in one file, plus a validator that refuses to start on a self inconsistent configuration |
+| Execution | [execution/](execution/) | Declarative diff based executor, OMS with idempotency keys, kill switch, structure lifecycle with orphan detection |
+| Analysis | [backtest/](backtest/) [monitor/](monitor/) | Three fill models, leakage suite, mark out recorder, structure level validation harness |
+
+**Invariants worth naming.** Position is derived from terminal fills and never from a counter. Orders carry an idempotency key minted before the network call, so a crash cannot double send. Multi leg structures are atomic: if the risk engine denies one leg, every leg is dropped, because a partially placed hedge is a naked directional bet.
+
+---
+
+## Data
+
+All of it is public and unauthenticated. No account is required to reproduce any result here.
+
+```
+market snapshots   3,404,590        trades         2,773,285
+candles            1,388,378        settlements        4,277
+distinct markets     138,193        decisions         15,722
 ```
 
-| Done | Module | What it holds |
-|---|---|---|
-| T-002…5 | [core/math/](core/math/) | Fee model, Kelly + shrinkage, e-process & sample sizes, tetrachoric + Dutch-book + ST Kelly |
-| T-006 | [core/db.py](core/db.py) | SQLite schema; append-only snapshots enforced by **triggers**, point-in-time reads |
-| T-010 | [venues/kalshi/](venues/kalshi/) | RSA-PSS signing, REST client, token-bucket limiter, universe enumerator |
-| T-014 | [recorder/main.py](recorder/main.py) | 24/7 universe recorder — **106,686 markets / 13,518 series in 28s** |
-| T-050b | [rulebook/exhaustiveness.py](rulebook/exhaustiveness.py) | The MECE gate — blocks **104/104** naive buy candidates on live data |
-| T-007 | [core/config.py](core/config.py) + [config/risk.yaml](config/risk.yaml) | Settings; §9 risk limits live in ONE file; secrets by path only |
-| T-044 | [shadow/engine.py](shadow/engine.py) | Queue-conservative counterfactual fills, mark-outs, pessimistic/optimistic bracket |
+The candle backfill is what made statistical power possible. `/series/{s}/markets/{t}/candlesticks` returns one minute OHLC of both sides of the book and **works on already settled markets**, so each backfilled market is a complete labelled example: the full price path the market believed, and the outcome that occurred. Do not enumerate via `status=settled`, which returns almost entirely parlay shards. Resolve from your own recorded universe with `/markets?tickers=` at 100 markets per request.
 
-### What building it corrected
+---
 
-Four errors, all found by running code against reality rather than notes — recorded in PLAN.md §C:
-
-1. **A growth-table cell that was never computed** (−31.0 bp → **−38.2 bp**).
-2. **Wrong fee-ratio boundary** — claimed 13¢, actually **42.9¢** (`fee/price = θ(1−p)` is linear, not explosive).
-3. **The "fee-free corner" does not exist.** research/06 named 14 series with `fee_multiplier = 0`; live there are **none**. The first-live-capital recommendation is withdrawn.
-4. **A rule that rejected 3,484 events wrongly** — `settlement_sources` is an event-level *fallback* list, not per-leg assignment, so per-leg divergence isn't detectable that way.
-
-### Data collection — running now, no credentials
+## Running it
 
 ```bash
-python -m recorder.main --once           # full universe sweep
-python -m recorder.l1 --interval 5       # L1 quotes + trade tape on a liquid watchlist
+pip install -e .
+python -m pytest -m "not live"          # 1095 offline tests
+python -m pytest -m live                # 16 tests against the public API
+
+python -m scripts.operate               # the whole pipeline, unattended
+python -m recorder.l1 --interval 5      # L1 quotes plus trade tape
+python -m recorder.history --limit 500  # backfill candle history
+python -m runner --mode shadow --once   # one shadow trading cycle
+python -m monitor.main                  # the KPI digest
 ```
 
-Kalshi's WebSocket and full L2 depth need auth, but **top of book and the trade tape are public** — and
-the tape carries **`taker_side` labelled by the exchange**, so trade-sign inference is never needed. (For
-contrast, feed-inferred direction on Polymarket agrees with on-chain truth only ~59% of the time.) That is
-enough for trade-through detection, realized spread, mark-outs, Kyle's λ, and full shadow mode.
+`scripts/operate.py` runs four tasks on independent cadences with isolated failures, because the tape is the only thing that cannot be backfilled. A quote missed at 14:03:22 is gone; a settlement missed now is still there in an hour.
 
-Measured: 300 markets polled in **0.17–0.38s**; ~3,600 quote snapshots and 36,000 trades captured in the
-first 90-second run.
+Touch a file named `KILL` in the run directory and everything stops within one poll.
 
-### Demo trading — WORKS
+---
 
-```bash
-python -m scripts.check_auth              # verify credentials
-python -m scripts.demo_order_lifecycle    # place / rest / queue-position / cancel / fill / flatten
-```
+## Status and honesty
 
-Full lifecycle verified on the demo exchange with mock funds: order placed, rests, `queue_position`
-returned, cancelled, marketable order **filled** (`fill_count=1.00`), position opened and flattened.
+The engine works. The strategies do not, and that conclusion is supported by measurement rather than by giving up.
 
-**Three endpoint corrections found only by trying it** — the spec and reality disagree:
+What is still open: calibration outside sports, since the settled sample is dominated by short dated sports and that is where the professional participants are. Politics and elections settle on longer clocks with thinner professional coverage, and they remain the most plausible place for the calibration result to break.
 
-| Documented | Reality on demo | Fix |
-|---|---|---|
-| `GET /portfolio/orders/{id}` | **404** (both V1 and V2 paths) | filter the list endpoint |
-| `GET .../events/orders/{id}/queue_position` | **404** — it exists ONLY under `/portfolio/orders/...` | use the V1 path |
-| `DELETE /portfolio/events/orders` (bulk cancel) | **404** | kill switch lists resting orders and cancels each |
-
-That last one matters: the I9 kill path has to work on the venue we actually run against, not the one in
-the spec.
-
-**And the demo book is degenerate.** The tightest spread across 1,000 markets was **98¢** (1¢/99¢). There
-is a counterparty — marketable orders fill — but at meaningless prices. Confirms demo is for integration
-testing only, never strategy validation.
-
-### Demo credentials — live and verified
-
-`python -m scripts.check_auth` passes end to end: 2048-bit RSA loaded, signature verifies locally, clock
-skew 0.4s, authenticated call returns a **$200 demo balance** (shard 0 of 4).
-
-**Two findings that reshaped the data plan:**
-
-1. **The demo has quotes but ZERO volume** — 202 of 1,000 sampled demo markets show a two-sided quote and
-   none has ever traded. Demo is an integration sandbox, not a source of strategy data.
-2. **Production WebSocket rejects unauthenticated connections (HTTP 401).** Real-time L2 depth is gated
-   behind a *production* account, not just any account.
-
-So the public REST **L1 poller + trade tape remains the production data source**, and shadow mode runs on
-it. Full L2 depth is deferred — it is not on the critical path.
-
-### Account status
-
-| | Needs | Status |
-|---|---|---|
-| **Demo / paper trading** | email only — Kalshi's help centre says to use **mock** name/address/SSN and supplies sandbox card + Plaid credentials | **Open to anyone** |
-| **Live trading** | US residential address, government photo ID, and a taxpayer ID — an **ITIN is accepted**, SSN is not the only route | Gate 0 |
-
-If the F-1 question in PLAN.md §13 applies, that is settled *before* and independently of the tax-ID
-mechanics.
-
-**Next:** T-011 demo WebSocket recorder → shadow engine → Gate 1.
-
-## Start here
-
-**[PLAN.md](PLAN.md)** — the execution plan and single source of truth. Written for an AI coding agent:
-invariants, canonical formulas, full data model, module contracts, per-sleeve strategy specs, the gate
-system, risk limits, runbooks, test requirements, and an ordered task backlog with acceptance criteria.
-
-## Supporting documents
-
-| Document | What it is |
-|---|---|
-| [PLAN.md](PLAN.md) | **The plan.** Agent-executable. ~1,500 lines. |
-| [The Prediction Market Playbook](https://claude.ai/code/artifact/db5e1395-1acc-45c2-b606-26a2838efac7) | Research report: venues, edges ranked, infrastructure, risk, taxes |
-| [Edge Engineering](https://claude.ai/code/artifact/743ab202-4082-4145-8d8d-c39815409c64) | Visual math report: fee algebra, Kelly under estimation error, drawdown, Monte Carlo charts |
-| [research/01-platforms.md](research/01-platforms.md) | Venue-by-venue: legality, fees, liquidity, APIs |
-| [research/02-strategies-and-edges.md](research/02-strategies-and-edges.md) | Documented edges with academic evidence and capacity estimates |
-| [research/03-infrastructure-apis.md](research/03-infrastructure-apis.md) | Kalshi/Polymarket APIs, historical data, backtesting, ops |
-| [research/04-risk-tax-regulatory.md](research/04-risk-tax-regulatory.md) | Kelly math, base rates, taxes (GA), regulation, visa considerations |
-| [research/05-live-recon-findings.md](research/05-live-recon-findings.md) | **MEASURED** live Kalshi universe — 12,553 events / 103,449 markets. Overrides earlier estimates. |
-| [research/06-kalshi-structure.md](research/06-kalshi-structure.md) | Kalshi operational reference from the API/OpenAPI spec — MECE semantics, per-series fees, tick structures, lifecycle, limits |
-| [research/07-microstructure.md](research/07-microstructure.md) | Quoting, queue position, fill modeling, impact, execution mechanics |
-| [research/08-statistical-methods.md](research/08-statistical-methods.md) | Calibration, sequential/anytime-valid inference, correlated-binary portfolios, multi-market Kelly, backtest validity, fill survival models, and Python tooling verified on this machine |
-| [research/recon/](research/recon/) | Harvester, analyzers, and the S2 Dutch-book / short-basket scanner prototypes |
-| [research/quant/quant_research.py](research/quant/quant_research.py) | Reproducible simulations (seed 42) → [results.txt](research/quant/results.txt) |
-
-## Core conclusions
-
-1. **Venues:** Kalshi (primary) + Polymarket US (secondary / RV leg) + optionally ForecastEx via IBKR.
-   Offshore Polymarket is forbidden.
-2. **Maker, not taker.** Kalshi data: makers −9.6% average vs takers −31.5%; makers buying ≥50¢ averaged
-   +2.6% post-fee. Simulated, maker discipline alone is worth ~10 points per 500 settlements.
-3. **The core edge family is relative value** — intra-event Dutch books (S2) and linked-market RV (S3) —
-   because it needs no forecasting skill, has guaranteed convergence at settlement, and lives in capacity
-   too small for large firms. Paired with a structural maker basket (S1) for volume and an income sleeve
-   (S6) that earns while validation accumulates.
-4. **Maker legs decide viability.** A 5-outcome Dutch book profits below 94.5¢ as taker but below 98.6¢ as
-   maker; a 5¢ implication violation nets 1.5¢ double-taker vs 4.1¢ double-maker. So: *post orders that
-   only fill at prices completing a profitable structure* — patience, not latency.
-5. **The moat is reading rulebooks,** not speed. Bots match titles; the durable opportunities are where
-   titles and rulebooks disagree. Correlation-of-definition risk is the top loss driver, so rulebook
-   equivalence is a hard gate.
-6. **Size at quarter Kelly on a halved edge, 2% cap.** Shrinkage λ = σe²/(σe²+σn²) ≈ 0.5 is a theorem.
-7. **Progression is gate-based, never calendar-based:** G0 compliance → G1 data → G2 pre-registered
-   backtest → G3 shadow → G4 canary → G5 earned scale.
-8. **Paper trading before capital, in four stages:** Manifold (bot mechanics) → Kalshi demo (integration
-   only — its prices are synthetic) → historical replay → **shadow mode against live books** (the real
-   validator; must be built, no product does it) → canary.
+No claim in this README is ahead of the code. Where a number is uncertain it is labelled as such in the research notes, and where the data cannot answer a question the notes say which data would.
