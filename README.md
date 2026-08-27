@@ -20,6 +20,10 @@ It was then pointed at the hardest question in the space: **is there a retail ac
 
 **The quote process mean reverts, and the spread is priced to capture exactly all of it.** Negative autocorrelation is robust at t = -21 and survives the bid ask bounce test on a single side of the book, so it is real rather than quote flicker. The predicted reversion scales cleanly with move size across two orders of magnitude, from 0.12c after a 1c move to 4.45c after a 20c move. **The spread stays 4 to 8 times larger in every single band.** The reversion is the market maker's compensation, and seeing the two track that tightly is what efficiency looks like from the inside.
 
+**Order flow is informed, and the spread does not cover it.** Measured on 429,335 trades across 534 markets, clustered by market: the mid moves **+1.94c in the taker's direction within one minute** of their print (t = +11.0), and the move persists at 5 and 30 minutes rather than decaying, which makes it permanent impact rather than a liquidity cost. Against a mean half spread of 1.43c, that puts the passive market maker at **-0.51c per contract before fees**, and makers pay zero fees on 13,412 of 13,545 series, so there is nothing left to recover it. This is the mechanism behind the market making result below, measured directly rather than cited.
+
+The first version of this measurement had the sign backwards. Marking a taker's fill price against a later mid makes them lose half the spread by construction, which looked like -1.53c of taker stupidity. Measuring the change in the mid instead isolates information from the spread they pay, and flips the conclusion.
+
 **Deterministic arbitrage is absent to the precision of the instrument.** Four independent logical constraints tested across 131,872 synchronized observations: mutually exclusive legs summing to $1, spread ladders monotone in strike, total ladders monotone, and "wins by more than k" never trading above "wins". **Zero violations**, net of real per series taker fees.
 
 **Where the money is, and why it is unreachable.** Genuine dislocations worth about **$1,258 per hour** do exist. Median episode lifetime is a single print, p90 is 48 milliseconds, and 65 percent of the value accrues to participants pairing legs within 5 milliseconds. A home round trip to Kalshi is 21ms, longer than a competitor's entire detect to acknowledge cycle. Capital was never the binding constraint; geography is.
@@ -38,7 +42,7 @@ Seven strategies, each closed on a number rather than an argument. The mechanism
 | Favourite longshot bias | not present | P(zero losses given calibration) = 0.638. Selling at the bid is EV negative under the null |
 | Cross venue vs Polymarket | no edge | Combined fee is `13p(1-p)` cents, 3.25c at 50c, against a published 2 to 4c gap |
 | Weather forecasting | no edge | Market implied error sd **1.95F** beats the best forecast buildable from free public data at **2.19F**, at matched lead |
-| Passive market making | no edge | Every volume band above 1k has a **1 cent** median spread. 100 lots is 0.044 percent of qualifying liquidity |
+| Passive market making | no edge | Adverse selection **1.94c** against a **1.43c** half spread, so **-0.51c per contract** before fees. Every volume band above 1k has a 1 cent median spread |
 
 The mechanism behind the first generalizes, and is the most useful single sentence here: **the margin gate selects books whose ask is rich precisely because nobody is buying it.** 67.5 percent of legs saw zero qualifying taker flow in 43 minutes, and median queue ahead was 2,249 contracts against an order size of 58.
 
