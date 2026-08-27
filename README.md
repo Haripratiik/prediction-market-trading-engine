@@ -1,4 +1,4 @@
-# Prediction Trading Engine
+# Prediction Market Trading Engine
 
 ![Python](https://img.shields.io/badge/Python-3.13-3776AB?style=flat&logo=python&logoColor=white)
 ![SQLite](https://img.shields.io/badge/SQLite-WAL-003B57?style=flat&logo=sqlite&logoColor=white)
@@ -19,7 +19,7 @@ The headline finding is a negative. That is the point, and the [errata](#what-bu
 ## Highlights
 
 - **Deterministic arbitrage does not exist here.** Four independent logical constraints tested across **131,872 synchronized observations**: mutually exclusive legs summing to $1, spread ladders monotone in strike, total ladders monotone, and "wins by more than k" never trading above "wins". **Zero violations**, net of real per series taker fees. See [Findings](#findings).
-- **The market is calibrated.** Measured on **940 settled markets and 435,936 one minute candles**, one observation per market. z scores of -0.76, +1.31 and +1.34 at 5, 30 and 120 minute leads. No price bucket survives Bonferroni correction. Brier 0.1748 against 0.2438 for a constant forecast, so it is genuinely informative and not merely unbiased.
+- **The market is calibrated, everywhere it can be measured.** **4,258 settled markets and 1.39 million one minute candles**, one observation per market, taken strictly before settlement. **17 category and lead cells** spanning Sports, Crypto, Financials, Commodities, Weather, Economics, Mentions and Entertainment, at 30 minute, 2 hour and 24 hour leads. **Not one survives Bonferroni correction.** Skill scores run from +0.21 to +0.74, so these markets are genuinely informative rather than merely unbiased. Backfill coverage is 99.6%, so the sample is the population and selection bias is eliminated by construction rather than argued away.
 - **The quote process mean reverts, and the spread eats exactly all of it.** Real and robust at t = -21, surviving the bid ask bounce test on a single side of the book. The predicted reversion scales cleanly with move size over two orders of magnitude, from 0.12c after a 1c move to 4.45c after a 20c move, and **the spread stays 4 to 8 times larger in every band**. The reversion is the market maker's compensation, priced precisely.
 - **Latency arbitrage is real and unreachable.** About **$1,258 per hour** of genuine dislocations exists, but median episode lifetime is a single print, p90 is 48ms, and 65% of the money goes to participants pairing legs within 5ms. Home round trip to Kalshi is 21ms, longer than a competitor's entire detect to acknowledge cycle. Capital was never the constraint.
 - **A public data path that removes the calendar constraint.** Kalshi serves full order book depth and historical one minute OHLC on already settled markets, unauthenticated. Ten minutes of fetching replaced sixteen days of waiting and took the demonstrable edge floor from **17.7pp to 4.06pp**. See [Data](#data).
@@ -84,9 +84,9 @@ Four processes with one contract between them: the database is the truth, risk i
 All of it is public and unauthenticated. No account is required to reproduce any result here.
 
 ```
-market snapshots   3,404,590        trades         2,773,285
-candles            1,388,378        settlements        4,277
-distinct markets     138,193        decisions         15,722
+market snapshots   3,404,590        trades          2,773,285
+candles            1,388,378        settlements         4,277
+distinct markets     138,193        candle coverage     99.6%
 ```
 
 The candle backfill is what made statistical power possible. `/series/{s}/markets/{t}/candlesticks` returns one minute OHLC of both sides of the book and **works on already settled markets**, so each backfilled market is a complete labelled example: the full price path the market believed, and the outcome that occurred. Do not enumerate via `status=settled`, which returns almost entirely parlay shards. Resolve from your own recorded universe with `/markets?tickers=` at 100 markets per request.
@@ -110,13 +110,3 @@ python -m monitor.main                  # the KPI digest
 `scripts/operate.py` runs four tasks on independent cadences with isolated failures, because the tape is the only thing that cannot be backfilled. A quote missed at 14:03:22 is gone; a settlement missed now is still there in an hour.
 
 Touch a file named `KILL` in the run directory and everything stops within one poll.
-
----
-
-## Status and honesty
-
-The engine works. The strategies do not, and that conclusion is supported by measurement rather than by giving up.
-
-What is still open: calibration outside sports, since the settled sample is dominated by short dated sports and that is where the professional participants are. Politics and elections settle on longer clocks with thinner professional coverage, and they remain the most plausible place for the calibration result to break.
-
-No claim in this README is ahead of the code. Where a number is uncertain it is labelled as such in the research notes, and where the data cannot answer a question the notes say which data would.
