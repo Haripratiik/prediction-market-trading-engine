@@ -1,0 +1,97 @@
+==============================================================================
+S2 DUTCH-BOOK FEASIBILITY — exchange-flagged mutually_exclusive events
+==============================================================================
+  MECE events with 2-30 live legs: 5,826
+
+------------------------------------------------------------------------------
+A. OVERROUND — what the books actually cost
+------------------------------------------------------------------------------
+  sum(YES ask)  [taker cost]             p5=1.010  p25=1.040  p50=1.140  p75=1.790  p95=2.930
+  events where EVERY leg has a real bid : 4,568   78.4%
+  sum(maker px) [restable only]          p5=0.080  p25=0.180  p50=0.920  p75=0.980  p95=1.010
+  implied maker->taker cost saving (c)   p5=1.0  p25=5.0  p50=20.0  p75=160.0  p95=282.0
+
+------------------------------------------------------------------------------
+B. PROFITABLE STRUCTURES — naive vs liquidity-filtered
+   filter: 24h vol>0, min leg size>=20, every spread<=10c, >1h to close
+------------------------------------------------------------------------------
+
+  TAKER
+    candidates (structure computable) : 5,826
+    positive BEFORE fees              : 89    1.5%
+    positive AFTER fees               : 47    0.8%
+    ... AND passes liquidity filter   : 11    0.2%   <-- REAL
+        net margin (cents)               p5=2.64  p25=6.77  p50=54.14  p75=83.45  p95=86.70
+        min leg size (contracts)         p5=20  p25=122  p50=227  p75=530  p95=1,206
+        hours to close                   p5=1,834  p25=3,082  p50=10,426  p75=19,301  p95=24,225
+      deployable @20% of min-leg size : $516
+      one-shot profit if ALL complete : $344
+      by category: {'Elections': 5, 'Politics': 2, 'Economics': 1, 'Science and Technology': 1, 'Entertainment': 1, 'Sports': 1}
+      top 12:
+        KXLAPRIMARY-01R26                      n= 2 sum=0.125 net=+86.70c size=   122 spr<=  3c v24=    100 Elections
+        KXSTATE51-29                           n= 8 sum=0.140 net=+85.04c size=   530 spr<=  1c v24=  2,069 Politics
+        KXLAPRIMARY-05D26                      n= 5 sum=0.155 net=+83.45c size=   100 spr<=  4c v24=     83 Elections
+        KXLAPRIMARY-06R26                      n= 4 sum=0.227 net=+75.82c size=   141 spr<=  6c v24=    102 Elections
+        KXMODELHIGH-27-1550                    n= 8 sum=0.410 net=+56.53c size= 1,206 spr<=  6c v24=    290 Science an
+        KXNCAAMBNEXTCOACH-KU26                 n=25 sum=0.430 net=+54.14c size=   282 spr<=  2c v24=  5,384 Sports
+        KXRANKLISTGOOGLESEARCH2-26DEC          n=11 sum=0.730 net=+22.61c size=   227 spr<=  3c v24=    495 Entertainm
+        KXPRESMATCHUP-28NOV07                  n=16 sum=0.835 net=+11.18c size=    20 spr<=  4c v24=     72 Elections
+        KXPHILIPPINESSENATE-28                 n= 2 sum=0.900 net= +6.77c size=   500 spr<=  7c v24=     80 Elections
+        KXDCCCCHAIR-27MAR02                    n= 9 sum=0.902 net= +4.20c size= 1,131 spr<=  1c v24= 11,984 Politics
+        KXFEDDECISION-27MAR                    n= 5 sum=0.940 net= +2.64c size=   184 spr<=  1c v24=    250 Economics
+
+  MAKER
+    candidates (structure computable) : 4,568
+    positive BEFORE fees              : 3,880   84.9%
+    positive AFTER fees               : 3,793   83.0%
+    ... AND passes liquidity filter   : 490   10.7%   <-- REAL
+        net margin (cents)               p5=0.13  p25=0.39  p50=1.16  p75=2.20  p95=5.11
+        min leg size (contracts)         p5=25  p25=107  p50=208  p75=600  p95=3,551
+        hours to close                   p5=59  p25=131  p50=335  p75=346  p95=10,426
+      deployable @20% of min-leg size : $51,982
+      one-shot profit if ALL complete : $786
+      by category: {'Sports': 418, 'Elections': 63, 'Politics': 3, 'Financials': 3, 'Climate and Weather': 2, 'Entertainment': 1}
+      top 12:
+        KXACQUANNOUNCEPINS-27JAN01             n= 6 sum=0.200 net=+79.66c size=    30 spr<=  4c v24=     32 Financials
+        KXNEWPOPE-70                           n= 7 sum=0.256 net=+73.97c size=   142 spr<=  2c v24=     51 Elections
+        KXHORMUZMAX-26AUG30                    n= 7 sum=0.760 net=+22.82c size=   100 spr<=  9c v24=     55 Politics
+        KXDCCCCHAIR-27MAR02                    n= 9 sum=0.850 net=+13.67c size=   100 spr<=  1c v24= 11,984 Politics
+        KXENGNLGAME-26AUG28ALDHTO              n= 3 sum=0.890 net= +9.96c size=   146 spr<= 10c v24=     20 Sports
+        KXNCAAFGAME-26SEP05CITCHAR             n= 2 sum=0.910 net= +8.57c size=   197 spr<= 10c v24=      3 Sports
+        KXITFWMATCH-26AUG25SAKMOR              n= 2 sum=0.910 net= +8.13c size= 1,041 spr<=  9c v24=  1,690 Sports
+        KXUECLADVANCE-26AUG27QARTWE            n= 2 sum=0.920 net= +7.23c size=10,006 spr<=  9c v24=     39 Sports
+        KXMLBGAME-26AUG282010CWSMIN            n= 2 sum=0.920 net= +7.14c size=   754 spr<=  9c v24=      5 Sports
+        KXNWSLGAME-26AUG29OPRURO               n= 3 sum=0.920 net= +6.90c size= 1,239 spr<=  5c v24=     46 Sports
+        KXUECLADVANCE-26AUG27FCCINT            n= 2 sum=0.930 net= +6.52c size=    30 spr<= 10c v24=      2 Sports
+        KXDTEMMYS-DRAMA26                      n= 5 sum=0.930 net= +6.41c size=   430 spr<=  8c v24=    140 Entertainm
+
+------------------------------------------------------------------------------
+C. HOW MUCH DO FEES DECIDE? (C2 thesis, measured)
+------------------------------------------------------------------------------
+  n= 2:  2666 events | fee hurdle taker  3.50c  maker  0.87c | max sum(px) to profit: taker 0.9650  maker 0.9913
+  n= 3:  1876 events | fee hurdle taker  4.59c  maker  1.15c | max sum(px) to profit: taker 0.9541  maker 0.9885
+  n= 5:    99 events | fee hurdle taker  5.47c  maker  1.37c | max sum(px) to profit: taker 0.9453  maker 0.9863
+  n= 8:    77 events | fee hurdle taker  5.97c  maker  1.49c | max sum(px) to profit: taker 0.9403  maker 0.9851
+  n=12:    43 events | fee hurdle taker  6.24c  maker  1.56c | max sum(px) to profit: taker 0.9376  maker 0.9844
+
+------------------------------------------------------------------------------
+D. COLLATERAL TREATMENT (capital efficiency for multi-leg structures)
+------------------------------------------------------------------------------
+  collateral_return_type across MECE events: {'MECNET': 5826}
+  NOTE: MECNET indicates mutually-exclusive netting. If Kalshi nets collateral
+        across legs of one MECE event, the capital needed for a Dutch book is
+        far below sum(px) x size. VERIFY against the API's margin/limits
+        endpoints before sizing S2 -- this materially changes ROLC.
+
+------------------------------------------------------------------------------
+E. STALENESS — why naive scans lie
+------------------------------------------------------------------------------
+  MECE events with ZERO 24h volume      : 3,585   61.5%
+  MECE events with ZERO lifetime volume : 2,386   41.0%
+  events with some leg spread > 10c     : 2,561   44.0%
+  events with a leg having NO bid at all : 1,258   21.6%
+
+  A scan that ignores these reports thousands of 'arbitrages' that cannot be
+  executed. The liquidity-filtered counts in section B are the honest number.
+
+Done.

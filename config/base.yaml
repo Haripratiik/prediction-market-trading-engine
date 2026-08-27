@@ -1,0 +1,3 @@
+# Non-secret defaults.  Environment variables override these.
+db_path: data/pm.db
+kalshi_env: demo

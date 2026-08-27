@@ -1,0 +1,59 @@
+==============================================================================
+F. IS `mutually_exclusive` ALSO EXHAUSTIVE?  (the MECE trap)
+==============================================================================
+  flagged-MECE events analysed: 6,069
+  events where quoted legs == total markets: 6,024 (99.3%)
+
+  events with sum(ask) < 0.90 -- 'too cheap to be real': 33
+  these are NOT arbitrage; they are events whose listed outcomes are not exhaustive
+  (mutually_exclusive == at most one YES; it does NOT promise at least one YES)
+
+    sum=0.116  markets_in_event=  2 quoted=  2  KXLAPRIMARY-02D26                  LA-02 Democratic nominee?
+    sum=0.119  markets_in_event=  2 quoted=  2  KXLAPRIMARY-01D26                  LA-01 Democratic nominee?
+    sum=0.125  markets_in_event=  2 quoted=  2  KXLAPRIMARY-01R26                  LA-01 Republican nominee?
+    sum=0.140  markets_in_event=  8 quoted=  8  KXSTATE51-29                       What will be the 51st state in Trump's term?
+    sum=0.148  markets_in_event=  2 quoted=  2  KXLAPRIMARY-04D26                  LA-04 Democratic nominee?
+    sum=0.155  markets_in_event=  5 quoted=  5  KXLAPRIMARY-05D26                  LA-05 Democratic nominee?
+    sum=0.158  markets_in_event=  3 quoted=  3  KXLAPRIMARY-04R26                  LA-04 Republican nominee?
+    sum=0.170  markets_in_event=  3 quoted=  3  KXLAPRIMARY-03D26                  LA-03 Democratic nominee?
+    sum=0.198  markets_in_event=  6 quoted=  6  KXNBERRECESSQ                      When will the next US recession start?
+    sum=0.227  markets_in_event=  4 quoted=  4  KXLAPRIMARY-06R26                  LA-06 Republican nominee?
+    sum=0.282  markets_in_event=  7 quoted=  7  KXNEWPOPE-70                       Who will the next Pope be?
+    sum=0.305  markets_in_event=  7 quoted=  7  KXLAPRIMARY-05R26                  LA-05 Republican nominee?
+    sum=0.310  markets_in_event=  6 quoted=  6  KXACQUANNOUNCEPINS-27JAN01         Who will acquire Pinterest this year?
+    sum=0.320  markets_in_event= 32 quoted= 32  KXNEXTTEAMNFL-26BSOR               Brendan Sorsby's Next Team
+
+==============================================================================
+G. n=2 MAKER 'DUTCH BOOK' IS JUST MARKET MAKING
+==============================================================================
+  liquidity-filtered MAKER-profitable structures : 504
+    n == 2  (two-sided quoting == market making) : 357  70.8%
+    n >= 3  (genuine multi-outcome inconsistency): 147  29.2%
+
+  n=2 net margin (c): p5=0.13  p25=0.30  p50=1.19  p75=2.18  p95=4.22
+  n>=3 net margin(c): p5=0.11  p25=0.86  p50=1.14  p75=2.36  p95=6.90
+
+  n>=3 by category: {'Sports': 132, 'Elections': 6, 'Politics': 3, 'Financials': 3, 'Climate and Weather': 2, 'Entertainment': 1}
+  n>=3 deployable @20% min-leg size: $15,709
+  n>=3 one-shot profit if all complete: $282
+
+  top 15 GENUINE (n>=3) maker structures:
+    KXACQUANNOUNCEPINS-27JAN01             n= 6 sum=0.200 net=+79.66c size=    30 spr<=  4c v24=     32 Financials
+    KXNEWPOPE-70                           n= 7 sum=0.256 net=+73.97c size=   142 spr<=  2c v24=     51 Elections
+    KXHORMUZMAX-26AUG30                    n= 7 sum=0.760 net=+22.82c size=   100 spr<=  9c v24=     55 Politics
+    KXDCCCCHAIR-27MAR02                    n= 9 sum=0.850 net=+13.67c size=   100 spr<=  1c v24= 11,984 Politics
+    KXDSAENDORSE28-28MAR01                 n= 6 sum=0.860 net=+12.98c size=   880 spr<=  8c v24=      0 Elections
+    KXSVKCUPGAME-26AUG26GECSNV             n= 3 sum=0.890 net=+10.57c size=   100 spr<=  8c v24=      0 Sports
+    KXENGNLGAME-26AUG28ALDHTO              n= 3 sum=0.890 net= +9.96c size=   146 spr<= 10c v24=     20 Sports
+    KXNWSLGAME-26AUG29OPRURO               n= 3 sum=0.920 net= +6.90c size= 1,239 spr<=  5c v24=     46 Sports
+    KXDTEMMYS-DRAMA26                      n= 5 sum=0.930 net= +6.41c size=   430 spr<=  8c v24=    140 Entertainm
+    KXSERIEAGAME-26SEP05ROMATA             n= 3 sum=0.930 net= +5.91c size=    50 spr<=  5c v24=      5 Sports
+    KXLOWTDEN-26AUG26                      n= 6 sum=0.930 net= +5.76c size=    30 spr<=  7c v24=    419 Climate an
+    KXACTBLUETOP-26AUG28                   n= 6 sum=0.940 net= +5.31c size=    75 spr<=  4c v24=  2,818 Politics
+    KXHOUSEWINSTATE-SCD                    n= 4 sum=0.940 net= +5.26c size=    26 spr<=  7c v24=    152 Elections
+    KXNWSLGAME-26AUG30WSPBAY               n= 3 sum=0.940 net= +5.07c size=   539 spr<=  7c v24=      6 Sports
+    KXNFL1H-26AUG27SFLV                    n= 3 sum=0.940 net= +5.04c size=   200 spr<=  4c v24=  1,396 Sports
+
+  READ: for n=2 the 'Dutch book' is resting both sides inside the spread --
+        that is S6 market making, and the margin is only realised if BOTH legs fill.
+        True S2 arbitrage lives at n>=3, and that set is much smaller.

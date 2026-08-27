@@ -1,0 +1,88 @@
+================================================================================
+S2-SHORT — SELLING MUTUALLY-EXCLUSIVE BASKETS (the structurally safe direction)
+================================================================================
+  MECE events with 2-90 live legs: 6,020
+  collateral_return_type values  : {'MECNET': 6020}
+
+--------------------------------------------------------------------------------
+A. THE OVERROUND IS ON THE SELL SIDE
+--------------------------------------------------------------------------------
+  sum(YES bid)  [what selling collects]    p5=0.040  p25=0.160  p50=0.880  p75=0.960  p95=0.990
+  sum(YES ask)  [what buying costs]        p5=1.010  p25=1.040  p50=1.150  p75=1.800  p95=2.930
+
+  events with sum(bid) > 1.00  (SELL candidates, SAFE) : 47    0.8%
+  events with sum(ask) < 1.00  (BUY candidates, UNSAFE): 90    1.5%
+
+--------------------------------------------------------------------------------
+B. PROFITABLE SHORT BASKETS
+--------------------------------------------------------------------------------
+
+  SELL INTO BID (taker fees)
+    positive after fees            : 0    0.0%
+    + liquidity filter             : 0    0.0%   <-- REAL
+
+  REST ASKS (maker, fee-free on ~99% of series)
+    positive after fees            : 5,819   96.7%
+    + liquidity filter             : 959   15.9%   <-- REAL
+        net margin per basket (c)          p5=1.00  p25=1.00  p50=2.00  p75=3.00  p95=7.70
+        min leg bid size                   p5=26  p25=105  p50=256  p75=754  p95=5,235
+        legs                               p5=2  p25=2  p50=2  p75=3  p95=3
+      baskets @20% of min-leg size   : 120,192 contracts
+      one-shot profit if all fill    : $2,669
+      by category: {'Sports': 841, 'Elections': 105, 'Economics': 4, 'Financials': 3, 'Climate and Weather': 2, 'Politics': 2, 'Companies': 1, 'Entertainment': 1}
+      top 15:
+        KXGREEKPM-27JUL25                    n= 9 sumbid=0.860 net=+35.00c size=     50 v24=     573 Elections
+        KXCBDECISIONENGLAND-26NOV05          n= 5 sumbid=1.010 net=+34.00c size=    100 v24=     643 Economics
+        KXCBDECISIONEU-26OCT29               n= 5 sumbid=0.900 net=+32.00c size=     89 v24=       2 Economics
+        KXHORMUZMAX-26AUG30                  n= 7 sumbid=0.690 net=+32.00c size=    100 v24=      55 Politics
+        KXLEADERNFLRTDS-27                   n=26 sumbid=0.920 net=+28.00c size=     45 v24=   2,378 Sports
+        KXSPEAKER120-27                      n= 7 sumbid=0.900 net=+19.00c size=     50 v24=     363 Elections
+        KXBERLIN2ND-26SEP20-2                n= 7 sumbid=1.000 net=+19.00c size=  1,996 v24=     382 Elections
+        KXISRPLGAME-26AUG29HAIHTA            n= 3 sumbid=0.800 net=+19.00c size=     39 v24=      72 Sports
+        KXBERLIN4TH-26SEP20-4                n= 7 sumbid=0.940 net=+16.00c size=    200 v24=      40 Elections
+        KXFEAR-26SEP11                       n= 5 sumbid=0.900 net=+16.00c size=    100 v24=      53 Financials
+        KXNHLEAST-27                         n=16 sumbid=0.930 net=+15.00c size=    186 v24=      23 Sports
+        KXITFWMATCH-26AUG25CHANEG            n= 2 sumbid=0.860 net=+15.00c size=    301 v24=   4,228 Sports
+        KXLIGAEXPGAME-26AUG30LENPIR          n= 3 sumbid=0.850 net=+15.00c size=    500 v24=       1 Sports
+        KXINXVSBTC-26DEC31                   n= 2 sumbid=0.870 net=+14.00c size=     58 v24=      47 Financials
+        KXDTEMMYS-DRAMA26                    n= 5 sumbid=0.890 net=+14.00c size=    430 v24=     140 Entertainme
+
+--------------------------------------------------------------------------------
+C. WHY THE SHORT SIDE IS SAFE AND THE LONG SIDE IS NOT
+--------------------------------------------------------------------------------
+  events with sum(bid) < 0.80 (almost certainly NOT exhaustive): 2,531
+  For these, BUYING the basket looks spectacular and returns $0 if no listed
+  outcome occurs. SELLING them is unaffected -- max liability is still $1.
+    sumbid=0.000 sumask=19.800 n=20 KXSERIEALAST-27                  Serie A Last Place Finisher
+    sumbid=0.000 sumask=17.820 n=18 KXLIGUE1LAST-27                  Ligue 1 Last Place Finisher
+    sumbid=0.000 sumask=19.800 n=20 KXLALIGALAST-27                  La Liga Last Place Finisher
+    sumbid=0.000 sumask=3.460 n=18 KXBUNDESLIGALAST-27              Bundesliga Last Place Finisher
+    sumbid=0.000 sumask=5.940 n= 6 KXSERIEAPOINTMARGIN-27P          Serie A: Champion's Points Margin
+    sumbid=0.000 sumask=1.980 n= 2 KXEPLH2HFINISH-EPL27NEWSUN       Newcastle United vs Sunderland: Who Will Finish Higher
+    sumbid=0.000 sumask=1.980 n= 2 KXEPLH2HFINISH-EPL27LFCEVE       Liverpool vs Everton: Who Will Finish Higher
+    sumbid=0.000 sumask=15.840 n=16 KXTHAIL1-27                      Thai League 1 Champion
+
+--------------------------------------------------------------------------------
+D. LEG-COUNT ECONOMICS (fees scale with N)
+--------------------------------------------------------------------------------
+    n  events  median sum(bid)  taker fee cost  maker fee cost
+    2   2,666            0.944           3.49c           0.00c
+    3   1,876            0.630           3.48c           0.00c
+    4     135            0.840           4.65c           0.00c
+    5      99            0.900           5.17c           0.00c
+    6     222            0.910           5.40c           0.00c
+    8      77            0.820           5.15c           0.00c
+   10      70            0.320           2.17c           0.00c
+   16      60            0.450           3.06c           0.00c
+   25      14            0.660           4.50c           0.00c
+
+--------------------------------------------------------------------------------
+E. CAPITAL: MECNET COLLATERAL
+--------------------------------------------------------------------------------
+  Every event here is collateral_return_type = MECNET, which per the API's own
+  semantics assesses collateral on the WORST-CASE EVENT OUTCOME rather than
+  per leg (EventPosition.event_exposure_dollars is a distinct field from the sum
+  of market_exposure_dollars). For a short basket the worst case is $1 per basket,
+  so required collateral should be ~ (1 - sum(bid)) per basket, NOT sum(1 - bid_i).
+
+Done.

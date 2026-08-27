@@ -1,0 +1,214 @@
+==============================================================================
+KALSHI LIVE UNIVERSE RECONNAISSANCE  (source: /events nested)
+==============================================================================
+{
+  "harvested_at": "2026-08-26T04:33:27Z",
+  "base": "https://api.elections.kalshi.com/trade-api/v2",
+  "n_markets": 0,
+  "n_events": 12553,
+  "markets_truncated": false,
+  "events_truncated": false
+}
+
+  non-parlay events with live quotes : 12,552
+  quoted markets                     : 103,449
+
+==============================================================================
+Q1. UNIVERSE COMPOSITION
+==============================================================================
+  events by category:
+    Sports                            7,374   58.7%
+    Elections                         2,174   17.3%
+    Entertainment                       676    5.4%
+    Financials                          629    5.0%
+    Politics                            596    4.7%
+    Economics                           490    3.9%
+    Climate and Weather                 195    1.6%
+    Science and Technology              140    1.1%
+    Crypto                              105    0.8%
+    Companies                            79    0.6%
+    Commodities                          43    0.3%
+    Mentions                             27    0.2%
+    Social                                9    0.1%
+    World                                 7    0.1%
+    Health                                6    0.0%
+    Transportation                        1    0.0%
+    ?                                     1    0.0%
+
+  distinct series: 3,789   top 20 by event count:
+    KXMIDTERMMOV                        522
+    KXMIDTERMVOTETURN                   502
+    KXHOUSERACE                         350
+    KXNCAAFGAME                         339
+    KXNCAAF1H                           206
+    KXITFMATCH                          199
+    KXMLBINNINGWIN                      136
+    KXMLBINNINGTOTAL                    136
+    KXITFWMATCH                         135
+    KXCS2MAP                            126
+    KXNCAAMSOCCERGAME                   122
+    KXLOLMAP                            117
+    KXCS2GAME                            86
+    KXNCAAFTOTAL                         78
+    KXNCAAFSPREAD                        78
+    KXATPSETWINNER                       78
+    KXWTASETWINNER                       76
+    KXNCAAFWINS                          73
+    KXCS2TOTALMAPS                       67
+    KXARTISTSTREAMSY                     61
+
+  collateral_return_type: {'MECNET': 6088, '?': 4225, 'DIRECNET': 2239}
+
+==============================================================================
+Q3. SPREADS, DEPTH, VOLUME
+==============================================================================
+  spread (dollars)                   p5=0.010  p25=0.030  p50=0.070  p75=0.390  p95=0.990
+  mean=0.2681  median=0.0700
+  spread <= 1c: 11,885  11.5%
+  spread <= 2c: 21,460  20.7%
+  spread <= 5c: 39,668  38.3%
+
+  spread distribution  (n=103449)
+    [   0.00,   0.01)    2985   2.9% #
+    [   0.01,   0.02)   17055  16.5% #########
+    [   0.02,   0.03)    4857   4.7% ##
+    [   0.03,   0.05)   11730  11.3% ######
+    [   0.05,   0.10)   26851  26.0% ##############
+    [   0.10,   0.20)    7575   7.3% ####
+    [   0.20,   0.50)    8825   8.5% ####
+    [   0.50,   1.01)   23571  22.8% ############
+  bid size at touch (contracts)      p5=0  p25=0  p50=20  p75=200  p95=3,360
+  bid notional at touch ($)          p5=$0  p25=$0  p50=$4  p75=$83  p95=$1,066
+  lifetime volume (contracts)        p5=0  p25=0  p50=0  p75=414  p95=12,100
+  24h volume (contracts)             p5=0  p25=0  p50=0  p75=0  p95=425
+  open interest                      p5=0  p25=0  p50=0  p75=277  p95=7,161
+  markets with ZERO 24h volume       : 87,753   84.8%
+  top   10 markets =  22.1% of 24h volume
+  top   50 markets =  42.1% of 24h volume
+  top  200 markets =  62.7% of 24h volume
+  top 1000 markets =  84.2% of 24h volume
+
+==============================================================================
+Q2. S1 STRUCTURAL SLEEVE — tradeable favorite band
+==============================================================================
+  mid in [0.70,0.95]                 : 9,944    9.6%
+  + horizon 1h-90d, depth>=$200      : 1,497
+  + nonzero 24h volume  (S1 UNIVERSE): 547
+  deployable @20% of touch depth     : $198,806
+  their spreads                      p5=0.010  p25=0.010  p50=0.020  p75=0.040  p95=0.120
+  their 24h volume                   p5=1  p25=27  p50=203  p75=797  p95=9,241
+  top series in S1 universe:
+    KXNCAAFGAME                         49
+    KXITFMATCH                          39
+    KXNFLTOTAL                          33
+    KXBTCD                              16
+    KXPGATOP20                          14
+    KXMLBTOTAL                          14
+    KXITFWMATCH                         14
+    KXNCAAFTOTAL                        11
+    KXUECLADVANCE                       11
+    KXMLSTOTAL                          10
+    KXLOLGAME                            9
+    KXBOXING                             8
+    KXCOPPERW                            8
+    KXUECLTOTAL                          8
+    KXINXU                               8
+  by category: {'Sports': 401, 'Commodities': 46, 'Crypto': 30, 'Financials': 22, 'Economics': 19, 'Entertainment': 12, 'Science and Technology': 9, 'Politics': 5}
+
+==============================================================================
+Q4. S2 DUTCH BOOK — exchange-declared mutually-exclusive events
+==============================================================================
+  events flagged mutually_exclusive   : 6,088   48.5%
+  ... with >=2 live legs              : 6,069
+  leg-count distribution: {2: 2666, 3: 1876, 4: 135, 5: 99, 6: 222, 7: 65, 8: 77, 9: 43, 10: 70, 11: 53, 12: 43, 13: 39, 14: 43, 15: 36, 16: 60}
+  by category: {'Sports': 4623, 'Elections': 913, 'Entertainment': 225, 'Climate and Weather': 94, 'Economics': 82, 'Politics': 50, 'Crypto': 31, 'Financials': 26, 'Science and Technology': 15, 'Companies': 3}
+  sum(YES ask) over MECE events      p5=1.010  p25=1.040  p50=1.140  p75=1.790  p95=2.930
+
+  sum(YES ask)  (n=5826)
+    [   0.00,   0.90)      32   0.5% 
+    [   0.90,   0.95)      13   0.2% 
+    [   0.95,   1.00)      44   0.8% 
+    [   1.00,   1.02)     556   9.5% #####
+    [   1.02,   1.05)    1203  20.6% ###########
+    [   1.05,   1.15)    1109  19.0% ##########
+    [   1.15,   1.50)     878  15.1% ########
+    [   1.50,   5.00)    1849  31.7% #################
+
+  sum(ask)   < 1.00 before fees : 89   after fees -> 47
+  sum(maker) < 1.00 before fees : 4,631   after fees -> 4,549
+  TAKER Dutch book profitable   : 47    0.8%
+  MAKER Dutch book profitable   : 4,549   78.1%   <-- C2 measured
+
+  top 12 TAKER-profitable structures:
+    KXLAPRIMARY-02D26                        n= 2 sum=0.116 net=+87.65c depth=     45 v24=        0  Elections
+    KXLAPRIMARY-01D26                        n= 2 sum=0.119 net=+87.34c depth=     22 v24=        0  Elections
+    KXLAPRIMARY-01R26                        n= 2 sum=0.125 net=+86.70c depth=    122 v24=      100  Elections
+    KXSTATE51-29                             n= 8 sum=0.140 net=+85.04c depth=    530 v24=    2,069  Politics
+    KXLAPRIMARY-04D26                        n= 2 sum=0.148 net=+84.24c depth=    100 v24=        0  Elections
+    KXLAPRIMARY-05D26                        n= 5 sum=0.155 net=+83.45c depth=    100 v24=       83  Elections
+    KXLAPRIMARY-04R26                        n= 3 sum=0.158 net=+83.18c depth=     42 v24=        0  Elections
+    KXLAPRIMARY-03D26                        n= 3 sum=0.170 net=+81.88c depth=     16 v24=      300  Elections
+    KXNBERRECESSQ                            n= 6 sum=0.198 net=+78.87c depth=      6 v24=      115  Economics
+    KXLAPRIMARY-06R26                        n= 4 sum=0.227 net=+75.82c depth=    141 v24=      102  Elections
+    KXNEWPOPE-70                             n= 7 sum=0.282 net=+69.91c depth=      6 v24=       51  Elections
+    KXLAPRIMARY-05R26                        n= 7 sum=0.305 net=+67.49c depth=      7 v24=      487  Elections
+
+  top 12 MAKER-profitable structures:
+    KXEPLH2HFINISH-EPL27NEWSUN               n= 2 sum=0.020 net=+97.97c depth=    100 v24=        0  Sports
+    KXEPLH2HFINISH-EPL27LFCEVE               n= 2 sum=0.020 net=+97.97c depth=    100 v24=        0  Sports
+    KXNFLH2HWINS-27SEALAR                    n= 2 sum=0.020 net=+97.97c depth=    100 v24=        0  Sports
+    KXNFLH2HWINS-27KCNE                      n= 2 sum=0.020 net=+97.97c depth=  1,000 v24=        0  Sports
+    KXNFLH2HWINS-27HOUDEN                    n= 2 sum=0.020 net=+97.97c depth=      1 v24=      127  Sports
+    KXNFLH2HWINS-27GBDET                     n= 2 sum=0.020 net=+97.97c depth=    200 v24=       29  Sports
+    KXNFLH2HWINS-27BALLAC                    n= 2 sum=0.020 net=+97.97c depth=    100 v24=        0  Sports
+    KXNFLH2HWINS-27ATLNYG                    n= 2 sum=0.020 net=+97.97c depth=    100 v24=       44  Sports
+    KXWTASETWINNER-26AUG26YEOHUN-2           n= 2 sum=0.020 net=+97.97c depth=    167 v24=        0  Sports
+    KXWTASETWINNER-26AUG26YEOHUN-1           n= 2 sum=0.020 net=+97.97c depth=    167 v24=        0  Sports
+    KXWTASETWINNER-26AUG26VALSAS-2           n= 2 sum=0.020 net=+97.97c depth=    167 v24=        0  Sports
+    KXWTASETWINNER-26AUG26VALSAS-1           n= 2 sum=0.020 net=+97.97c depth=    167 v24=        0  Sports
+
+  MAKER-profitable AND traded in 24h AND depth>=20: 671   <-- realistic S2 pipeline
+
+==============================================================================
+Q5. S3 LINKED RV — structure available
+==============================================================================
+  multi-leg events NOT flagged MECE  : 5,103  <- L2/L3/L4 link candidates
+  by category: {'Sports': 2134, 'Elections': 1162, 'Financials': 566, 'Entertainment': 328, 'Economics': 295, 'Politics': 255, 'Science and Technology': 94, 'Climate and Weather': 86, 'Crypto': 60, 'Companies': 54}
+  leg counts: {2: 350, 3: 278, 4: 456, 5: 762, 6: 477, 7: 305, 8: 314, 9: 516, 10: 343, 11: 147, 12: 55, 13: 92}
+  events with >=3 legs (ladders)     : 8,156
+  top ladder series: {'KXMIDTERMVOTETURN': 502, 'KXMIDTERMMOV': 475, 'KXNCAAF1H': 206, 'KXMLBINNINGWIN': 136, 'KXNCAAMSOCCERGAME': 122, 'KXNCAAFTOTAL': 78, 'KXNCAAFSPREAD': 78, 'KXNCAAFWINS': 73, 'KXARTISTSTREAMSY': 61, 'KXTACAPORTGAME': 47, 'KXVOTEPRIMARY': 41, 'KXDTEMMYS': 40}
+
+==============================================================================
+Q6. RULEBOOK ENGINE FEASIBILITY
+==============================================================================
+  markets with rules_primary text    : 103,449  100.0%
+  rules_primary length (chars)       p5=93  p25=118  p50=142  p75=175  p95=245
+  events with settlement_sources     : 12,552  100.0%
+  top settlement sources:
+    ESPN                                                          5,062
+    Fox Sports                                                    3,057
+    the Governing League                                          1,574
+    Kalshi using information originating from the NCAA            1,202
+    The Wall Street Journal                                         583
+    Gamers World                                                    555
+    Flashscore                                                      542
+    official election authority responsible for certifying resul    525
+    Library of Congress                                             512
+    Reuters                                                         508
+    The New York Times                                              427
+    the Associated Press                                            417
+    The Washington Post                                             417
+    ITF                                                             411
+    CNN                                                             406
+
+==============================================================================
+TIME-TO-CLOSE (capital lockup)
+==============================================================================
+  hours to close                     p5=13.4  p25=138.4  p50=1,608.4  p75=4,776.4  p95=11,818.4
+    <24h      7,561    7.3%
+    1-7d     21,690   21.0%
+    1-4wk    14,335   13.9%
+    1-3mo    10,779   10.4%
+    >3mo     49,084   47.4%
+
+Done.

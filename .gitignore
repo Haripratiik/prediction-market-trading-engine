@@ -1,0 +1,17 @@
+__pycache__/
+*.pyc
+data/
+.pytest_cache/
+*.db
+*.db-wal
+*.db-shm
+KILL
+config/secrets.env
+.venv/
+*.pem
+*.key
+KalshiPrivateKey*
+.kalshi/
+*.json.gz
+*.egg-info/
+.DS_Store
