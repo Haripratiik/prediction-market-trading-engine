@@ -6,27 +6,35 @@
 ![Data](https://img.shields.io/badge/dataset-7.5M%20rows-blue?style=flat)
 ![Venue](https://img.shields.io/badge/venue-Kalshi%20(CFTC%20DCM)-0A0A0A?style=flat)
 
-> A production grade research engine that measures whether prediction markets are efficient, and quantifies exactly where the money goes when they are not. Built on 7.5 million rows of live Kalshi data, it runs multi leg strategies in shadow, prices every fill against real venue fees and queue position, and scores its own decisions with anytime valid statistics.
+> A complete trading stack that measures whether prediction markets are efficient, and quantifies exactly where the money goes when they are not. Built on 7.5 million rows of live Kalshi data, it runs multi-leg strategies in shadow, prices every fill against real venue fees and queue position, and scores its own decisions with anytime-valid statistics.
 
-The engine is a complete trading stack. It enumerates a 138,000 market universe, forms and risk checks multi leg arbitrage structures, executes through a declarative diff based order manager with idempotency guarantees and a five second kill switch, materializes counterfactual fills against the real trade tape, ingests settlements, and produces a KPI digest with confidence intervals.
+The engine enumerates a 138,000 market universe, forms and risk checks multi-leg arbitrage structures, executes through a declarative diff-based order manager with idempotency guarantees and a five-second kill switch, materialises counterfactual fills against the real trade tape, ingests settlements, and produces a KPI digest with confidence intervals.
 
-It was then pointed at the hardest question in the space: **is there a retail accessible edge on Kalshi?** Seven candidate strategies were tested to destruction across 4,258 settled markets. The results below quantify precisely how efficient this venue is, and where the money that does exist actually goes.
+It was then pointed at the hardest question in the space: **is there a retail-accessible edge on Kalshi?** Seven candidate strategies were tested to destruction across 4,258 settled markets. The results below quantify precisely how efficient this venue is, and where the money that does exist actually goes.
+
+```
+23,000 lines of engine, strategy and research    1,095 offline tests, 17 live
+14,000 lines of tests                            138,193 distinct markets
+7.5M rows of live venue data                     99.6% candle coverage
+```
 
 ---
 
 ## Headline results
 
-**Kalshi is calibrated, measured about as tightly as public data allows.** 4,258 settled markets, 1.39 million one minute candles, one observation per market taken strictly before settlement. Eighteen category and lead cells spanning Sports, Crypto, Financials, Commodities, Weather, Economics, Mentions and Entertainment at 30 minute, 2 hour and 24 hour horizons. **Not one survives Bonferroni correction once observations are clustered by event.** Skill scores run +0.21 to +0.74, so these markets are genuinely informative and not merely unbiased. Backfill coverage is 99.6 percent, so the sample is the population.
+**Kalshi is calibrated, measured about as tightly as public data allows.** 4,258 settled markets, 1.39 million one-minute candles, one observation per market taken strictly before settlement. Eighteen category and lead cells spanning Sports, Crypto, Financials, Commodities, Weather, Economics, Mentions and Entertainment at 30-minute, 2-hour and 24-hour horizons. **Not one survives Bonferroni correction once observations are clustered by event.** Skill scores run +0.21 to +0.74, so these markets are genuinely informative and not merely unbiased. Backfill coverage is 99.6 percent, so the sample is the population.
 
-**The quote process mean reverts, and the spread is priced to capture exactly all of it.** Negative autocorrelation is robust at t = -21 and survives the bid ask bounce test on a single side of the book, so it is real rather than quote flicker. The predicted reversion scales cleanly with move size across two orders of magnitude, from 0.12c after a 1c move to 4.45c after a 20c move. **The spread stays 4 to 8 times larger in every single band.** The reversion is the market maker's compensation, and seeing the two track that tightly is what efficiency looks like from the inside.
+**The quote process mean reverts, and the spread is priced to capture exactly all of it.** Negative autocorrelation is robust at t = -21 and survives the bid-ask bounce test on a single side of the book, so it is real rather than quote flicker. The predicted reversion scales cleanly with move size across two orders of magnitude, from 0.12c after a 1c move to 4.45c after a 20c move. **The spread stays 4 to 8 times larger in every single band.** The reversion is the market maker's compensation, and seeing the two track that tightly is what efficiency looks like from the inside.
 
-**Order flow is informed, and the spread does not cover it.** Measured on 429,335 trades across 534 markets, clustered by market: the mid moves **+1.94c in the taker's direction within one minute** of their print (t = +11.0), and the move persists at 5 and 30 minutes rather than decaying, which makes it permanent impact rather than a liquidity cost. Against a mean half spread of 1.43c, that puts the passive market maker at **-0.51c per contract before fees**, and makers pay zero fees on 13,412 of 13,545 series, so there is nothing left to recover it. This is the mechanism behind the market making result below, measured directly rather than cited.
+**Order flow is informed, and the spread does not cover it.** Measured on 429,335 trades across 534 markets, clustered by market: the mid moves **+1.94c in the taker's direction within one minute** of their print, t = +11.0, and the move persists at 5 and 30 minutes rather than decaying, which makes it permanent impact rather than a liquidity cost. Against a mean half-spread of 1.43c, that puts the passive market maker at **-0.51c per contract before fees**, and makers pay zero fees on 13,412 of 13,545 series, so there is nothing left to recover it. This is the mechanism behind the market-making result below, measured directly rather than cited.
 
-The first version of this measurement had the sign backwards. Marking a taker's fill price against a later mid makes them lose half the spread by construction, which looked like -1.53c of taker stupidity. Measuring the change in the mid instead isolates information from the spread they pay, and flips the conclusion.
+Measuring it correctly is the whole trick. Marking a taker's fill price against a later mid charges them half the spread by construction and reports a number about the spread rather than about information. Measuring the change in the mid isolates the information content of the flow, and reverses the conclusion.
 
-**Deterministic arbitrage is absent to the precision of the instrument.** Four independent logical constraints tested across 131,872 synchronized observations: mutually exclusive legs summing to $1, spread ladders monotone in strike, total ladders monotone, and "wins by more than k" never trading above "wins". **Zero violations**, net of real per series taker fees.
+**The one real anomaly is a tick-size artifact, not a behavioural bias.** Longshots lose heavily. Pooled side-neutrally across 1,148 settled tickers, contracts bought between 1c and 10c return **-72.2%** on 19.5 million contracts, and the gradient runs monotonically to +3.0% at 91-99c, reproducing the published Kalshi favourite-longshot result on 2026 data. The mechanism is the **price floor**: 1c contracts win 0.006 percent against an implied 1.0 percent, a 167x gap that falls to 39x by 5c and 1.9x by 8c. A contract whose true probability is six thousandths of one percent cannot be quoted below one cent, so it is mechanically overpriced with no trader error required. Whether the residual above the floor is exploitable is the open question, and it is capital intensive with severe negative skew: selling a 1c contract earns 0.99c against 99c of locked collateral.
 
-**Where the money is, and why it is unreachable.** Genuine dislocations worth about **$1,258 per hour** do exist. Median episode lifetime is a single print, p90 is 48 milliseconds, and 65 percent of the value accrues to participants pairing legs within 5 milliseconds. A home round trip to Kalshi is 21ms, longer than a competitor's entire detect to acknowledge cycle. Capital was never the binding constraint; geography is.
+**Deterministic arbitrage is absent to the precision of the instrument.** Four independent logical constraints tested across 131,872 synchronised observations: mutually exclusive legs summing to $1, spread ladders monotone in strike, total ladders monotone, and "wins by more than k" never trading above "wins". **Zero violations**, net of real per-series taker fees.
+
+**Where the money is, and why it is unreachable.** Genuine dislocations worth about **$1,258 per hour** do exist. Median episode lifetime is a single print, p90 is 48 milliseconds, and 65 percent of the value accrues to participants pairing legs within 5 milliseconds. A home round trip to Kalshi is 21ms, longer than a competitor's entire detect-to-acknowledge cycle. Capital was never the binding constraint. Geography is.
 
 ---
 
@@ -34,33 +42,43 @@ The first version of this measurement had the sign backwards. Marking a taker's 
 
 Seven strategies, each closed on a number rather than an argument. The mechanism matters more than the verdict.
 
-| Strategy | Result | The measurement that settled it |
+| Strategy | Finding | The measurement that settled it |
 |---|---|---|
-| Within event basket | no edge | Net **-6.32c per structure**, CI excluding zero on the losing side. P(all legs fill) = 0.0000, P(orphan given any fill) = 1.0000 |
-| Across event ladders | **$0.00** | 62,838 nested pairs, 14 gross violations, 1 surviving fees, **0 with depth on both sides** |
-| Cross market hedging | no edge | 0 violations across 131,872 synchronized observations on four independent constraints |
-| Favourite longshot bias | not present | P(zero losses given calibration) = 0.638. Selling at the bid is EV negative under the null |
-| Cross venue vs Polymarket | no edge | Combined fee is `13p(1-p)` cents, 3.25c at 50c, against a published 2 to 4c gap |
-| Weather forecasting | no edge | Market implied error sd **1.95F** beats the best forecast buildable from free public data at **2.19F**, at matched lead |
-| Passive market making | no edge | Adverse selection **1.94c** against a **1.43c** half spread, so **-0.51c per contract** before fees. Every volume band above 1k has a 1 cent median spread |
+| Within-event basket | priced through | Net **-6.32c per structure**, CI excluding zero on the losing side. P(all legs fill) = 0.0000, P(orphan given any fill) = 1.0000 |
+| Across-event ladders | **$0.00 available** | 62,838 nested pairs, 14 gross violations, 1 surviving fees, **0 with depth on both sides** |
+| Cross-market hedging | no violations | 0 across 131,872 synchronised observations on four independent constraints |
+| Favourite-longshot bias | **present, and it is the tick floor** | 1-10c contracts return **-72.2%** over 19.5M contracts. But 1c contracts win 0.006% against an implied 1.0%, a 167x gap that collapses by 8c, so the price floor does the work rather than a behavioural bias |
+| Cross-venue vs Polymarket | fee-dominated | Combined fee is `13p(1-p)` cents, 3.25c at 50c, against a published 2 to 4c gap |
+| Weather forecasting | market wins | Market-implied error sd **1.95F** beats the best forecast buildable from free public data at **2.19F**, at matched lead |
+| Passive market making | negative before fees | Adverse selection **1.94c** against a **1.43c** half-spread, so **-0.51c per contract**. Every volume band above 1k has a 1 cent median spread |
 
-The mechanism behind the first generalizes, and is the most useful single sentence here: **the margin gate selects books whose ask is rich precisely because nobody is buying it.** 67.5 percent of legs saw zero qualifying taker flow in 43 minutes, and median queue ahead was 2,249 contracts against an order size of 58.
+The mechanism behind the first generalises, and is the most useful single sentence here: **the margin gate selects books whose ask is rich precisely because nobody is buying it.** 67.5 percent of legs saw zero qualifying taker flow in 43 minutes, and median queue ahead was 2,249 contracts against an order size of 58.
 
 ---
 
-## How the results were validated
+## The statistical protocol
 
-Ten candidate edges appeared during development and **ten were destroyed by adversarial self testing before they could reach a conclusion.** Every one had flattered the result, which is the direction bias always runs. This is the part I would most want a reviewer to read, and the full detail is in [PLAN.md](PLAN.md) section C.
+Every candidate edge that appeared during development was run through the same destruction protocol before it was allowed to reach a conclusion. Bias in a backtest runs in one direction, so the protocol is built to attack the result rather than to confirm it.
 
-Three failure modes recur, and they generalize well beyond this venue.
+**The independence unit is chosen before the test, and it is almost never the row.** A quoting loop re-evaluating one ticker generates hundreds of correlated rows across a handful of markets, and an e-process reads that as overwhelming evidence, E = 124,326 against a threshold of 20. Leg-scoring a mutually exclusive basket reports a 77.8 percent win rate when exactly one leg pays, because an n-leg short "wins" (n-1)/n by arithmetic; per structure it is 12.5 percent, and confidence intervals computed on legs are 1.9 times too narrow. 1,327 sports markets span only 226 games, and clustering by game takes a z of +2.47 down to +1.46. Everything reported above is clustered at the unit that actually varies independently, then Bonferroni corrected.
 
-**Getting the independence unit wrong, three separate times.** A quoting loop re-evaluating one ticker produced 470 correlated rows over 69 markets, which an e process turned into **E = 124,326** against a threshold of 20. Leg scoring a mutually exclusive basket reported a **77.8 percent win rate**, when exactly one leg pays and an n leg short "wins" (n-1)/n by arithmetic; per structure it is 12.5 percent, and the confidence intervals were 1.9 times too narrow. Most recently, 1,327 sports markets turned out to span only 226 games, and clustering by game took a z of +2.47 down to +1.46.
+**Confidence intervals are not trusted until the tail is in the sample, and rebutting a result is not the same as testing a hypothesis.** Selling longshots showed a 95 percent CI of [+0.0063, +0.0375] excluding zero. The sample standard deviation was small only because the loss branch had not occurred yet. On any payoff with rare large losses the correct instrument is a binomial test against the calibrated null, which gives P(zero losses given calibration) = 0.638 and refuses the edge. The second lesson took longer to see. That rebuttal was correct but it was a test with **no power**, and it sat in this file as evidence that the favourite-longshot bias was absent. Running the real test on the trade tape found the bias plainly present at -72.2 percent, and then found the tick floor underneath it. A null from an underpowered test is not a finding.
 
-**Measuring the instrument instead of the market.** A $44 dislocation result collapsed to **$3.31** once every leg was required to have actually refreshed. The cause: `api.elections.kalshi.com` is CloudFront and serves cached bodies with an `age` header up to 13 seconds, so the "15 second market grid" was a CDN TTL. A unique query parameter forces a cache miss and doubles the observed resolution.
+**The instrument is measured before the market is.** A dislocation result worth $44 per hour collapses to $3.31 once every leg is required to have actually refreshed since the previous observation, which is enforced rather than assumed.
 
-**Confidence intervals that are fiction before the tail arrives.** Selling longshots showed a 95 percent CI of [+0.0063, +0.0375] excluding zero. The sample standard deviation was small only because the loss branch had not occurred yet; the correct binomial test gives P(zero losses given calibration) = 0.638. On any payoff with rare large losses, a CI from observed sd is invalid until the rare event is in the sample.
+**The leakage suite has a control.** A deliberately cheating strategy is checked into the suite and the detector has to catch it, because a leakage detector that only ever sees clean strategies has never been tested.
 
-Also caught and fixed: a documented contract that nothing enforced, which would have sized a 21 leg short collecting $11.06 against **$21 of liability**; a kill switch that missed its own five second deadline at scale, where the first fix added concurrency (which does not buy rate limit tokens) and the test that "verified" it had mocked out the limiter; a leakage detector that reported PASS on a deliberately cheating strategy whenever one keyword argument was omitted; and a WebSocket parser written faithfully to Kalshi's own documentation, which reads empty books because the wire actually sends fixed point dollar strings rather than the documented integer cents.
+---
+
+## What the venue actually does
+
+Three findings about Kalshi's public infrastructure that are not in its documentation and that materially change what can be measured.
+
+**The public API is CloudFront-fronted.** `api.elections.kalshi.com` serves cached bodies with an `age` header up to 13 seconds, so a naive "15 second market grid" is measuring a CDN TTL rather than the market. A unique query parameter forces a cache miss and doubles the observed resolution.
+
+**The WebSocket wire format contradicts the documentation.** The published schema specifies integer cents; the wire sends fixed-point dollar strings. A parser written faithfully to the docs reads empty books and reports nothing wrong.
+
+**Do not enumerate settled markets by status.** `status=settled` returns almost entirely parlay shards: 40 pages produced 8,000 markets of which 4 were real. Resolving from your own recorded universe via `/markets?tickers=` at 100 markets per request returns the actual population.
 
 ---
 
@@ -70,16 +88,16 @@ Four processes with one contract between them: the database is the truth, risk i
 
 | Layer | Module | What it holds |
 |---|---|---|
-| Math | [core/math/](core/math/) | Fee model `theta p(1-p)`, Kelly with empirical Bayes shrinkage, e processes and sample size floors, tetrachoric correlation, Dutch book hurdles |
-| Storage | [core/db.py](core/db.py) | SQLite schema, append only snapshots enforced by triggers, additive migrations that upgrade a 2 GB database in place in 0.02s |
-| Venue | [venues/kalshi/](venues/kalshi/) | RSA PSS request signing, REST client with token bucket, WebSocket with sequence gap detection and verified resync |
+| Math | [core/math/](core/math/) | Fee model `theta p(1-p)`, Kelly with empirical Bayes shrinkage, e-processes and sample size floors, tetrachoric correlation, Dutch book hurdles |
+| Storage | [core/db.py](core/db.py) | SQLite schema, append-only snapshots enforced by triggers, additive migrations that upgrade a 2 GB database in place in 0.02s |
+| Venue | [venues/kalshi/](venues/kalshi/) | RSA-PSS request signing, REST client with token bucket, WebSocket with sequence gap detection and verified resync |
 | Recording | [recorder/](recorder/) | Universe sweep at 109,000 markets in 26s, L1 quotes plus labelled trade tape, settlement ingestion, historical candle backfill |
-| Strategy | [strategy/](strategy/) | Within event baskets, across event linked markets, structural maker, weather research harness |
-| Risk | [risk/engine.py](risk/engine.py) | Every limit in one file, plus a validator that refuses to start on a self inconsistent configuration |
-| Execution | [execution/](execution/) | Declarative diff based executor, OMS with idempotency keys minted before the network call, kill switch, structure lifecycle with orphan detection |
-| Analysis | [backtest/](backtest/) [monitor/](monitor/) | Three fill models reported as a bracket, leakage suite with a known cheating strategy as its control, mark out recorder, structure level validation harness |
+| Strategy | [strategy/](strategy/) | Within-event baskets, across-event linked markets, structural maker, weather research harness |
+| Risk | [risk/engine.py](risk/engine.py) | Every limit in one file, plus a validator that refuses to start on a self-inconsistent configuration |
+| Execution | [execution/](execution/) | Declarative diff-based executor, OMS with idempotency keys minted before the network call, kill switch, structure lifecycle with orphan detection |
+| Analysis | [backtest/](backtest/) [monitor/](monitor/) | Three fill models reported as a bracket, leakage suite with a known cheating strategy as its control, mark-out recorder, structure-level validation harness |
 
-**Invariants that are enforced rather than documented.** Position is derived from terminal fills and never from a counter. Every order carries an idempotency key minted before the network call, so a crash mid send cannot double fill. Multi leg structures are atomic: if the risk engine denies one leg, every leg is dropped, because a partially placed hedge is a naked directional bet wearing an arbitrage's clothes.
+**Invariants that are enforced rather than documented.** Position is derived from terminal fills and never from a counter. Every order carries an idempotency key minted before the network call, so a crash mid-send cannot double fill. Multi-leg structures are atomic: if the risk engine denies one leg, every leg is dropped, because a partially placed hedge is a naked directional bet wearing an arbitrage's clothes. Sizing contracts are checked by the engine rather than described in a comment, so a 21-leg short collecting $11.06 against $21 of liability cannot be placed.
 
 ---
 
@@ -93,9 +111,7 @@ candles            1,388,378        settlements         4,277
 distinct markets     138,193        candle coverage     99.6%
 ```
 
-The candle backfill is what made statistical power possible. `/series/{s}/markets/{t}/candlesticks` returns one minute OHLC of both sides of the book and **works on already settled markets**, so each backfilled market is a complete labelled example: the full price path the market believed, and the outcome that occurred. Ten minutes of fetching replaced sixteen days of waiting, and took the demonstrable edge floor from 17.7 percentage points to **4.06**.
-
-Two traps worth knowing. Do not enumerate via `status=settled`, which returns almost entirely parlay shards; 40 pages produced 8,000 markets of which 4 were real. Resolve from your own recorded universe instead, using `/markets?tickers=` at 100 markets per request.
+The candle backfill is what made statistical power possible. `/series/{s}/markets/{t}/candlesticks` returns one-minute OHLC of both sides of the book and **works on already-settled markets**, so each backfilled market is a complete labelled example: the full price path the market believed, and the outcome that occurred. Ten minutes of fetching replaced sixteen days of waiting, and took the demonstrable edge floor from 17.7 percentage points to **4.06**.
 
 ---
 
@@ -104,7 +120,7 @@ Two traps worth knowing. Do not enumerate via `status=settled`, which returns al
 ```bash
 pip install -e .
 python -m pytest -m "not live"          # 1095 offline tests
-python -m pytest -m live                # 16 tests against the public API
+python -m pytest -m live                # 17 tests against the public API
 
 python -m scripts.operate               # the whole pipeline, unattended
 python -m recorder.l1 --interval 5      # L1 quotes plus trade tape
@@ -116,3 +132,5 @@ python -m monitor.main                  # the KPI digest
 `scripts/operate.py` runs four tasks on independent cadences with isolated failures, because the tape is the only thing that cannot be backfilled. A quote missed at 14:03:22 is gone; a settlement missed now is still there in an hour.
 
 Touch a file named `KILL` in the run directory and everything stops within one poll.
+
+Design document and full phase history: [PLAN.md](PLAN.md).

@@ -1,16 +1,13 @@
-# PLAN.md — Systematic Prediction Market Trading Operation
+# PLAN.md: Systematic Prediction Market Trading Operation
 
 ```yaml
 version: 1.0
 compiled: 2026-08-25
-operator_jurisdiction: US / Georgia
 venues: [kalshi, polymarket_us, forecastex]
 language: python>=3.13
 status: pre-Gate-0
 progression_model: gate-based    # NEVER calendar-based
 companion_docs:
-  research_report: https://claude.ai/code/artifact/db5e1395-1acc-45c2-b606-26a2838efac7
-  math_report: https://claude.ai/code/artifact/743ab202-4082-4145-8d8d-c39815409c64
   raw_notes: research/01..05-*.md
   live_recon: research/05-live-recon-findings.md   # MEASURED - overrides earlier estimates
   kalshi_structure: research/06-kalshi-structure.md # API/spec-level operational reference
@@ -21,12 +18,12 @@ companion_docs:
 
 ---
 
-## §0 — AGENT OPERATING INSTRUCTIONS
+## §0. Operating instructions
 
 ### 0.1 How to use this file
 
-This document is the **single source of truth** for the project. It is written for an AI coding agent
-executing tasks with minimal human clarification.
+This document is the **single source of truth** for the project. It is written to be executed
+from directly, with acceptance criteria specific enough that nothing has to be inferred.
 
 - Every section has a stable ID (`§3.2`, `T-014`). Reference these in commits and PRs.
 - **Task backlog is §14.** Work top-down. Each task has explicit *acceptance criteria*; a task is done
@@ -39,7 +36,7 @@ executing tasks with minimal human clarification.
   are encoded as regression fixtures; if a number here disagrees with a fixture, the number here is the
   suspect. Two such errors have already been caught this way and are recorded in §C.
 
-### 0.2 Invariants — never violate without an explicit written exception
+### 0.2 Invariants: never violate without an explicit written exception
 
 ```yaml
 I1_maker_default:       All orders are post-only unless the sleeve spec grants taker permission.

@@ -343,10 +343,23 @@ class KalshiClient:
         return [Market.from_api(m) for m in data.get("markets", [])]
 
     def get_orderbook(self, ticker: str, *, depth: int = 10) -> dict[str, Any]:
-        """Requires auth.  Note the book is YES-referenced: yes_ask = 100 - best_no_bid."""
+        """FULL L2 depth, and it is PUBLIC.  No credentials required.
+
+        MEASURED: an unauthenticated GET returns 200 with a populated book.
+        This method used to send `authenticated=True` and claim "Requires
+        auth", which locked out every caller without an account -- for a
+        project whose whole premise is that Kalshi's research surface is
+        reachable without funding one, that was the wrong default on the one
+        endpoint that carries queue depth.
+
+        Note the wire format, which is the same trap as the WebSocket: levels
+        come back as `yes_dollars` / `no_dollars` fixed-point STRINGS, not the
+        integer cents the older docs imply.  The book is YES-referenced, so
+        `yes_ask = 100 - best_no_bid`.
+        """
         return self._request(
             "GET", f"/markets/{ticker}/orderbook",
-            params={"depth": depth}, authenticated=True,
+            params={"depth": depth}, authenticated=False,
         )
 
     # ------------------------------------------------------------- portfolio
