@@ -2,7 +2,7 @@
 
 ![Python](https://img.shields.io/badge/Python-3.13-3776AB?style=flat&logo=python&logoColor=white)
 ![SQLite](https://img.shields.io/badge/SQLite-WAL-003B57?style=flat&logo=sqlite&logoColor=white)
-![Tests](https://img.shields.io/badge/tests-1128%20passing-2ea44f?style=flat)
+![Tests](https://img.shields.io/badge/tests-1133%20passing-2ea44f?style=flat)
 ![Data](https://img.shields.io/badge/dataset-7.5M%20rows-blue?style=flat)
 ![Venue](https://img.shields.io/badge/venue-Kalshi%20(CFTC%20DCM)-0A0A0A?style=flat)
 
@@ -13,7 +13,7 @@ The engine enumerates a 138,000 market universe, forms and risk checks multi-leg
 It was then pointed at the hardest question in the space: **is there a retail-accessible edge on Kalshi?** Seven candidate strategies were tested to destruction across 4,258 settled markets. The results below quantify precisely how efficient this venue is, and where the money that does exist actually goes.
 
 ```
-23,000 lines of engine, strategy and research    1,128 offline tests, 17 live
+23,000 lines of engine, strategy and research    1,133 offline tests, 17 live
 14,000 lines of tests                            138,193 distinct markets
 7.5M rows of live venue data                     99.6% candle coverage
 ```
@@ -98,6 +98,7 @@ Four processes with one contract between them: the database is the truth, risk i
 | Storage | [core/db.py](core/db.py) | SQLite schema, append-only snapshots enforced by triggers, additive migrations that upgrade a 2 GB database in place in 0.02s |
 | Venue | [venues/kalshi/](venues/kalshi/) | RSA-PSS request signing, REST client with token bucket, WebSocket with sequence gap detection and verified resync |
 | Recording | [recorder/](recorder/) | Universe sweep at 109,000 markets in 26s, L1 quotes plus labelled trade tape, settlement ingestion, historical candle backfill |
+| Rulebook | [rulebook/](rulebook/) | MECE exhaustiveness, the S3 link graph, the joint no-arbitrage LP over every market on a game, cross-event implications that emit L2 links at `NEEDS_HUMAN` rather than firing trades |
 | Strategy | [strategy/](strategy/) | Within-event baskets, across-event linked markets, structural maker, weather research harness |
 | Risk | [risk/engine.py](risk/engine.py) | Every limit in one file, plus a validator that refuses to start on a self-inconsistent configuration |
 | Execution | [execution/](execution/) | Declarative diff-based executor, OMS with idempotency keys minted before the network call, kill switch, structure lifecycle with orphan detection |
@@ -125,7 +126,7 @@ The candle backfill is what made statistical power possible. `/series/{s}/market
 
 ```bash
 pip install -e .
-python -m pytest -m "not live"          # 1128 offline tests
+python -m pytest -m "not live"          # 1133 offline tests
 python -m pytest -m live                # 17 tests against the public API
 
 python -m scripts.operate               # the whole pipeline, unattended

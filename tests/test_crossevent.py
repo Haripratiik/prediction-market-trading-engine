@@ -175,3 +175,46 @@ def test_the_draw_leg_is_required_for_the_upper_bound():
     """
     assert check_advance("FIX", [_tie(win_ask=42, draw_ask=27, adv_bid=60)]) == []
     assert len(check_advance("FIX", [_tie(win_ask=42, draw_ask=0, adv_bid=60)])) == 1
+
+
+# --------------------------------------------------------------------------- #
+# Feeding the S3 link graph rather than trading beside it.
+# --------------------------------------------------------------------------- #
+from rulebook.crossevent import advance_links   # noqa: E402
+from rulebook.exhaustiveness import Verdict     # noqa: E402
+from rulebook.links import LinkSource, LinkType  # noqa: E402
+
+GAME = {"TOL": "G-TOL", "ATX": "G-ATX", "TIE": "G-TIE"}
+ADV = {"TOL": "A-TOL", "ATX": "A-ATX"}
+
+
+def test_a_tie_yields_one_implication_link_per_team():
+    links = advance_links(GAME, ADV)
+    assert {l.tickers for l in links} == {("G-TOL", "A-TOL"), ("G-ATX", "A-ATX")}
+    assert all(l.link_type is LinkType.IMPLICATION for l in links)
+
+
+def test_the_win_leg_is_the_subset_not_the_superset():
+    """L2 is ordered (subset, superset): winning implies advancing, not back."""
+    link = advance_links(GAME, ADV)[0]
+    assert link.tickers[0].startswith("G-")      # the 90 minute result
+    assert link.tickers[1].startswith("A-")      # progression
+
+
+def test_links_are_not_tradeable_until_a_human_verifies_them():
+    """These legs sit in different events, so nothing guarantees the rulebooks
+    agree. The gate must stay closed on discovery."""
+    assert all(l.equivalence_status is Verdict.NEEDS_HUMAN
+               for l in advance_links(GAME, ADV))
+    assert all(l.source is LinkSource.SAME_UNDERLYING
+               for l in advance_links(GAME, ADV))
+
+
+def test_the_draw_leg_never_becomes_a_link():
+    """TIE has no counterpart in the advance event and must not be paired."""
+    assert all("G-TIE" not in l.tickers for l in advance_links(GAME, ADV))
+
+
+def test_a_team_quoted_in_only_one_event_is_skipped():
+    links = advance_links({"TOL": "G-TOL", "TIE": "G-TIE"}, ADV)
+    assert [l.tickers for l in links] == [("G-TOL", "A-TOL")]

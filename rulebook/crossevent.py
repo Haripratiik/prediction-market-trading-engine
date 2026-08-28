@@ -49,7 +49,10 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
+from collections.abc import Mapping
 from typing import Iterable
+
+from rulebook.links import Link, LinkSource, implication_link
 
 #: A bucket with no upper edge, used for the ">89 deg" tail.
 INF = 10_000
@@ -256,4 +259,48 @@ def check_advance(fixture: str, legs: Iterable[TieLegs]) -> list[CrossViolation]
                                       f"{g.team}:adv",
                                       (f"{g.team}:win", "draw"),
                                       hedge, g.adv_bid))
+    return out
+
+
+# --------------------------------------------------------------------------- #
+# Feeding the S3 link graph.
+#
+# `check_advance` above answers "is this board inconsistent right now". That is
+# a research instrument. The ENGINE trades from `rulebook.links`, where a
+# constraint is a `Link` carrying provenance, the rules hashes of both legs, and
+# an `equivalence_status` that starts at NEEDS_HUMAN. Emitting links rather than
+# firing trades keeps the human verification gate in the path, which matters
+# more here than anywhere else: these two legs live in DIFFERENT EVENTS, so
+# nothing about the venue guarantees their rulebooks agree.
+# --------------------------------------------------------------------------- #
+def advance_links(game: Mapping[str, str], advance: Mapping[str, str], *,
+                  markets_by_ticker: Mapping[str, object] | None = None
+                  ) -> list["Link"]:
+    """L2 links for a single-leg knockout tie: P(win in 90) <= P(advance).
+
+    `game` maps team code (and "TIE") to ticker in the result event; `advance`
+    maps team code to ticker in the progression event.
+
+    ONLY THE LOWER HALF OF THE SANDWICH IS EXPRESSIBLE HERE. The upper bound,
+    P(advance) <= P(win) + P(draw), has a two-market basket on its right-hand
+    side, and an L2 link holds exactly two tickers. `check_advance` tests that
+    half; do not read a clean link set as a clean board.
+
+    The links are NOT valid for a two-legged tie, where a team can advance
+    having lost the second leg. Callers must not hand this fixtures from a
+    competition round that plays home and away.
+    """
+    out: list[Link] = []
+    for team, adv_ticker in advance.items():
+        win_ticker = game.get(team)
+        if win_ticker is None or team == "TIE":
+            continue
+        out.append(implication_link(
+            win_ticker, adv_ticker,
+            markets_by_ticker=markets_by_ticker,
+            source=LinkSource.SAME_UNDERLYING,
+            detail={"reason": "winning a single-leg tie in regulation means "
+                              "advancing, so the win cannot price above it",
+                    "team": team, "upper_bound_checked_by": "check_advance"},
+        ))
     return out
