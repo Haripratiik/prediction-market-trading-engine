@@ -34,6 +34,8 @@ Measuring it correctly is the whole trick. Marking a taker's fill price against 
 
 **Deterministic arbitrage is absent to the precision of the instrument.** Four independent logical constraints tested across 131,872 synchronised observations: mutually exclusive legs summing to $1, spread ladders monotone in strike, total ladders monotone, and "wins by more than k" never trading above "wins". **Zero violations**, net of real per-series taker fees.
 
+**And the complete joint test agrees.** Pairwise constraints only check the relations somebody thought to encode. Kalshi lists up to twenty market types on one game -- moneyline, spread, total, team total, both-teams-score, exact score -- and all of them are indicators over the same grid of final scores, so the whole board admits one question: does **any** probability distribution price every market inside its own spread simultaneously? If none does then, by LP duality, a portfolio exists with non-negative payoff in every state and negative cost. Exact-score markets pin the entire joint distribution, which makes this strictly stronger than any pairwise scan, and it catches relations nobody named. Run over every game whose score space fits the grid: **zero violations**. The implementation is [rulebook/jointarb.py](rulebook/jointarb.py).
+
 **Where the money is, and why it is unreachable.** Genuine dislocations worth about **$1,258 per hour** do exist. Median episode lifetime is a single print, p90 is 48 milliseconds, and 65 percent of the value accrues to participants pairing legs within 5 milliseconds. A home round trip to Kalshi is 21ms, longer than a competitor's entire detect-to-acknowledge cycle. Capital was never the binding constraint. Geography is.
 
 ---
