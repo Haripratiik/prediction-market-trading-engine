@@ -2,7 +2,7 @@
 
 ![Python](https://img.shields.io/badge/Python-3.13-3776AB?style=flat&logo=python&logoColor=white)
 ![SQLite](https://img.shields.io/badge/SQLite-WAL-003B57?style=flat&logo=sqlite&logoColor=white)
-![Tests](https://img.shields.io/badge/tests-1095%20passing-2ea44f?style=flat)
+![Tests](https://img.shields.io/badge/tests-1111%20passing-2ea44f?style=flat)
 ![Data](https://img.shields.io/badge/dataset-7.5M%20rows-blue?style=flat)
 ![Venue](https://img.shields.io/badge/venue-Kalshi%20(CFTC%20DCM)-0A0A0A?style=flat)
 
@@ -13,7 +13,7 @@ The engine enumerates a 138,000 market universe, forms and risk checks multi-leg
 It was then pointed at the hardest question in the space: **is there a retail-accessible edge on Kalshi?** Seven candidate strategies were tested to destruction across 4,258 settled markets. The results below quantify precisely how efficient this venue is, and where the money that does exist actually goes.
 
 ```
-23,000 lines of engine, strategy and research    1,095 offline tests, 17 live
+23,000 lines of engine, strategy and research    1,111 offline tests, 17 live
 14,000 lines of tests                            138,193 distinct markets
 7.5M rows of live venue data                     99.6% candle coverage
 ```
@@ -34,7 +34,7 @@ Measuring it correctly is the whole trick. Marking a taker's fill price against 
 
 **Deterministic arbitrage is absent to the precision of the instrument.** Four independent logical constraints tested across 131,872 synchronised observations: mutually exclusive legs summing to $1, spread ladders monotone in strike, total ladders monotone, and "wins by more than k" never trading above "wins". **Zero violations**, net of real per-series taker fees.
 
-**And the complete joint test agrees.** Pairwise constraints only check the relations somebody thought to encode. Kalshi lists up to twenty market types on one game -- moneyline, spread, total, team total, both-teams-score, exact score -- and all of them are indicators over the same grid of final scores, so the whole board admits one question: does **any** probability distribution price every market inside its own spread simultaneously? If none does then, by LP duality, a portfolio exists with non-negative payoff in every state and negative cost. Exact-score markets pin the entire joint distribution, which makes this strictly stronger than any pairwise scan, and it catches relations nobody named. Run over every game whose score space fits the grid: **zero violations**. The implementation is [rulebook/jointarb.py](rulebook/jointarb.py).
+**And the complete joint test agrees.** Pairwise constraints only check the relations somebody thought to encode. Kalshi lists up to twenty market types on one game -- moneyline, spread, total, team total, both-teams-score, exact score -- and all of them are indicators over the same grid of final scores, so the whole board admits one question: does **any** probability distribution price every market inside its own spread simultaneously? If none does then, by LP duality, a portfolio exists with non-negative payoff in every state and negative cost. Exact-score markets pin the entire joint distribution, which makes this strictly stronger than any pairwise scan, and it catches relations nobody named. Getting a trustworthy answer meant killing three parse bugs first, each betrayed by the same tell -- a violation far too large to be real. A first-half total scored against the full-time state space showed 24c. A soccer-sized nine-goal grid applied to a WNBA board showed 76c. And the guard written to catch the second bug read the digits of a game code, `26AUG261610PITSD`, as a scoring threshold of 261610, which quietly excluded a third of the sample. The grid is now sized from the legs that actually parse. Result across **34 games**, with no board excluded for grid size: **zero violations**. The implementation is [rulebook/jointarb.py](rulebook/jointarb.py).
 
 **Where the money is, and why it is unreachable.** Genuine dislocations worth about **$1,258 per hour** do exist. Median episode lifetime is a single print, p90 is 48 milliseconds, and 65 percent of the value accrues to participants pairing legs within 5 milliseconds. A home round trip to Kalshi is 21ms, longer than a competitor's entire detect-to-acknowledge cycle. Capital was never the binding constraint. Geography is.
 
@@ -121,7 +121,7 @@ The candle backfill is what made statistical power possible. `/series/{s}/market
 
 ```bash
 pip install -e .
-python -m pytest -m "not live"          # 1095 offline tests
+python -m pytest -m "not live"          # 1111 offline tests
 python -m pytest -m live                # 17 tests against the public API
 
 python -m scripts.operate               # the whole pipeline, unattended

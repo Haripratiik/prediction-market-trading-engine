@@ -85,12 +85,32 @@ def required_grid(suffixes: Iterable[str]) -> int:
     the LP then reports a 76 cent violation that is entirely an artifact of the
     board not fitting the grid. Sizing from the quoted thresholds removes the
     assumption: a basketball board asks for a grid that a caller can refuse.
+
+    CALLERS MUST PASS OUTCOME SUFFIXES ONLY -- see `board_grid`. Kalshi tickers
+    are `SERIES-GAMECODE-SUFFIX`, but a few carry no outcome suffix at all, so
+    a naive `ticker.split("-")[-1]` yields the GAME CODE: the digits of
+    `26AUG261610PITSD` run together into a threshold of 261610. That
+    direction is safe (a larger grid only gives the LP more freedom, so it can
+    never manufacture a violation) but it silently costs coverage.
     """
     biggest = 0
     for suf in suffixes:
         for m in re.finditer(r"(\d+)", suf.upper()):
             biggest = max(biggest, int(m.group(1)))
     return biggest
+
+
+def board_grid(markets: Iterable[tuple[str, str]], home: str, away: str) -> int:
+    """Grid size needed by the legs that actually PARSE, ignoring the rest.
+
+    `markets` is (series, suffix) pairs. A leg that `parse_leg` refuses -- a
+    first-half market, a tennis match, an unrecognised suffix -- never enters
+    the LP, so its digits must not size the grid either.
+    """
+    return required_grid(
+        suf for series, suf in markets
+        if parse_leg(series, suf, home, away) is not None
+    )
 
 
 # --------------------------------------------------------------------------- #

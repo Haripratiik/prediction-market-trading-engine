@@ -14,8 +14,8 @@ from __future__ import annotations
 
 import pytest
 
-from rulebook.jointarb import (Leg, check, is_full_game, parse_leg,
-                               required_grid, states)
+from rulebook.jointarb import (Leg, board_grid, check, is_full_game,
+                               parse_leg, required_grid, states)
 
 HOME, AWAY = "RMA", "RSO"
 
@@ -158,3 +158,51 @@ def test_the_free_other_state_only_ever_makes_the_lp_easier():
         leg("KXLALIGAGAME", AWAY, 40, 45),
     ]
     assert check("sparse", legs, max_goals=3).feasible
+
+
+# --------------------------------------------------------------------------- #
+# Sizing the grid from the board.  These guard the SECOND parse trap: a number
+# that is not a scoring threshold at all.
+# --------------------------------------------------------------------------- #
+def test_a_game_code_is_not_a_scoring_threshold():
+    """`ticker.split("-")[-1]` yields the GAME CODE on suffix-less tickers.
+
+    `KXMLBERA-26AUG261610PITSD` has no outcome suffix, so the naive split hands
+    back the game code. Its digits run together into `261610`, which reads as a
+    scoring threshold for a baseball game. Only legs that actually parse may
+    size the grid.
+    """
+    board = [("KXMLBGAME", "PIT"), ("KXMLBGAME", "SD"),
+             ("KXMLBERA", "26AUG261610PITSD"),      # game code, unparsable
+             ("KXMLBTOTAL", "9")]
+    assert required_grid([s for _, s in board]) == 261610    # the trap
+    assert board_grid(board, "PIT", "SD") == 9               # the fix
+
+
+def test_a_half_time_market_does_not_size_the_full_time_grid():
+    """A period leg never enters the LP, so its digits must not size the grid."""
+    board = [("KXLALIGATOTAL", "3"), ("KXLALIGA1HTOTAL", "7")]
+    assert board_grid(board, HOME, AWAY) == 3
+
+
+def test_the_grid_still_fits_a_high_scoring_board():
+    """The point of sizing is that basketball must not be silently truncated."""
+    board = [("KXWNBAGAME", "TOR"), ("KXWNBAGAME", "SEA"),
+             ("KXWNBATOTAL", "160")]
+    assert board_grid(board, "TOR", "SEA") == 160
+
+
+def test_an_oversized_grid_cannot_manufacture_a_violation():
+    """Sizing too LARGE is the safe direction, and this pins that claim.
+
+    A bigger grid only adds free states, which can only ever make the LP easier
+    to satisfy. A board that is consistent on its own grid stays consistent on
+    a much larger one.
+    """
+    legs = [Leg("t3", 0.30, 0.34, parse_leg("KXLALIGATOTAL", "3", HOME, AWAY)),
+            Leg("h", 0.50, 0.54, parse_leg("KXLALIGAGAME", HOME, HOME, AWAY)),
+            Leg("a", 0.28, 0.32, parse_leg("KXLALIGAGAME", AWAY, HOME, AWAY))]
+    tight = check("g", legs, max_goals=9)
+    wide = check("g", legs, max_goals=40)
+    assert tight.feasible and wide.feasible
+    assert wide.slack <= tight.slack + 1e-9
