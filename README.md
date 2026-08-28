@@ -2,7 +2,7 @@
 
 ![Python](https://img.shields.io/badge/Python-3.13-3776AB?style=flat&logo=python&logoColor=white)
 ![SQLite](https://img.shields.io/badge/SQLite-WAL-003B57?style=flat&logo=sqlite&logoColor=white)
-![Tests](https://img.shields.io/badge/tests-1111%20passing-2ea44f?style=flat)
+![Tests](https://img.shields.io/badge/tests-1128%20passing-2ea44f?style=flat)
 ![Data](https://img.shields.io/badge/dataset-7.5M%20rows-blue?style=flat)
 ![Venue](https://img.shields.io/badge/venue-Kalshi%20(CFTC%20DCM)-0A0A0A?style=flat)
 
@@ -13,7 +13,7 @@ The engine enumerates a 138,000 market universe, forms and risk checks multi-leg
 It was then pointed at the hardest question in the space: **is there a retail-accessible edge on Kalshi?** Seven candidate strategies were tested to destruction across 4,258 settled markets. The results below quantify precisely how efficient this venue is, and where the money that does exist actually goes.
 
 ```
-23,000 lines of engine, strategy and research    1,111 offline tests, 17 live
+23,000 lines of engine, strategy and research    1,128 offline tests, 17 live
 14,000 lines of tests                            138,193 distinct markets
 7.5M rows of live venue data                     99.6% candle coverage
 ```
@@ -35,6 +35,10 @@ Measuring it correctly is the whole trick. Marking a taker's fill price against 
 **Deterministic arbitrage is absent to the precision of the instrument.** Four independent logical constraints tested across 131,872 synchronised observations: mutually exclusive legs summing to $1, spread ladders monotone in strike, total ladders monotone, and "wins by more than k" never trading above "wins". **Zero violations**, net of real per-series taker fees.
 
 **And the complete joint test agrees.** Pairwise constraints only check the relations somebody thought to encode. Kalshi lists up to twenty market types on one game -- moneyline, spread, total, team total, both-teams-score, exact score -- and all of them are indicators over the same grid of final scores, so the whole board admits one question: does **any** probability distribution price every market inside its own spread simultaneously? If none does then, by LP duality, a portfolio exists with non-negative payoff in every state and negative cost. Exact-score markets pin the entire joint distribution, which makes this strictly stronger than any pairwise scan, and it catches relations nobody named. Getting a trustworthy answer meant killing three parse bugs first, each betrayed by the same tell -- a violation far too large to be real. A first-half total scored against the full-time state space showed 24c. A soccer-sized nine-goal grid applied to a WNBA board showed 76c. And the guard written to catch the second bug read the digits of a game code, `26AUG261610PITSD`, as a scoring threshold of 261610, which quietly excluded a third of the sample. The grid is now sized from the legs that actually parse. Result across **34 games**, with no board excluded for grid size: **zero violations**. The implementation is [rulebook/jointarb.py](rulebook/jointarb.py).
+
+**And so does the cross-event test, which is the one nobody runs.** Every constraint above lives inside a single event. Kalshi also prices the same world in two events that never touch: `KXHIGHLAX-26AUG26` partitions the day's maximum temperature into buckets, while `KXTEMPLAXH-26AUG2616` asks whether the reading at 4pm exceeds a threshold. Separate series, separate order books, and welded together by something that cannot fail -- the day's maximum is at least the reading at any hour inside it. Buying every bucket that overlaps `[X, inf)` and selling the hourly gives a payoff that is never negative, so any price gap is riskless. The first run reported 35 hits worth up to 80c, all of them false: the basket was assembled from whatever happened to be quoted that minute, and a partition with a hole in it looks cheap precisely because it is incomplete. With a tiling guard in place, **402 complete hedges priced across six cities, zero profitable**, median -43c and a best case of exactly breakeven. The implementation is [rulebook/crossevent.py](rulebook/crossevent.py).
+
+**The one real cross-event violation found, and the tape that explains it.** The same test applied to knockout cup ties, where Kalshi prices the 90 minute result and who advances as two separate events, bounded on both sides: winning implies advancing, and advancing implies you did not lose in regulation. Across **2,683 team-minutes**, five gross violations. Priced with Kalshi's real fee, `ceil(0.07 x C x P x (1-P))` rounded up **per order**, all five die at one contract and three survive from ten contracts up, worth **+1.33c, +0.52c and +0.30c** per contract. Two of the three sit in a book quoted 6/35 with zero volume, so they are not executable at any size. The third is real, and the minute-by-minute tape shows the mechanism exactly: Toluca's game market repriced from 73 to 87 on **10,150 contracts**, the advance market stayed at 82/85 for under a minute while the game book already knew, and then repriced on **10,595 contracts**. The violation is the lag between two books during a repricing event. That is a genuine arbitrage, it was worth 0.30c per contract net, and it belonged to whoever was closest to the exchange.
 
 **Where the money is, and why it is unreachable.** Genuine dislocations worth about **$1,258 per hour** do exist. Median episode lifetime is a single print, p90 is 48 milliseconds, and 65 percent of the value accrues to participants pairing legs within 5 milliseconds. A home round trip to Kalshi is 21ms, longer than a competitor's entire detect-to-acknowledge cycle. Capital was never the binding constraint. Geography is.
 
@@ -121,7 +125,7 @@ The candle backfill is what made statistical power possible. `/series/{s}/market
 
 ```bash
 pip install -e .
-python -m pytest -m "not live"          # 1111 offline tests
+python -m pytest -m "not live"          # 1128 offline tests
 python -m pytest -m live                # 17 tests against the public API
 
 python -m scripts.operate               # the whole pipeline, unattended
