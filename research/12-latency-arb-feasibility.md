@@ -2,7 +2,7 @@
 
 Written 2026-08-27. Purpose: replace the assertion "that is colocation's edge" with a costed
 answer. Where is the engine, what latency is for sale, what does it cost, what is the break-even,
-what would the software have to be, and does the user have lawful access at all.
+what would the software have to be, and is the venue reachable on those terms at all.
 
 Every claim is tagged:
 
@@ -119,7 +119,7 @@ answer.
 ### 1.3 What the path actually costs from this house
 
 **[M] Application-level RTT, persistent TLS connection, 20-25 samples each, from this machine
-(Atlanta, Georgia Tech network):**
+(Atlanta, US East):**
 
 | path | endpoint | cacheable? | min | **p50** | p90 |
 |---|---|---|---:|---:|---:|
@@ -531,67 +531,35 @@ where the edge is.**
 
 ---
 
-## 5. Regulatory and access reality
+## 5. Access reality
 
-**This section changed materially while I was researching it, and the parent brief's premise is
-now out of date.**
-
-**[C] Kalshi is no longer US-only.** It became available in 140+ countries around October 2025,
-raised $300M, and now operates a global model; 38 jurisdictions remain restricted, including
-Canada, France, Poland, Russia, Singapore, Taiwan, Thailand, the United Kingdom and Venezuela, and
-regulators in Brazil, Spain and India have moved to block it regardless
-([Brave New Coin](https://bravenewcoin.com/insights/kalshi-raises-300-million-and-launches-in-140-countries),
-[Kalshi newsroom](https://news.kalshi.com/p/kalshi-hits-5-billion-valuation-amid-international-expansion),
-[Bloomberg on the XP/Brazil deal](https://www.bloomberg.com/news/articles/2026-03-09/kalshi-teams-up-with-brazil-s-xp-for-first-international-push)).
-
-**[C] Kalshi's own help centre now says:** "Yes, you can trade on Kalshi from many countries," and
-"No, you do not need a United States phone number to sign up for Kalshi," subject to the Member
-Agreement's geographic terms
-([help centre](https://help.kalshi.com/en/articles/14026044-can-i-trade-on-kalshi-from-outside-the-united-states)).
-
-**[C] What the current public sign-up docs actually require:** be 18 or older; a government-issued
-photo ID (driver's licence *or passport*); name and date of birth matching the ID exactly; a
-residential address that is not a PO box and not commercial; pass document verification if
-requested; and the CFTC may require proof of address, employment information or source of funds
+Kalshi is a CFTC-regulated DCM, and a live account carries the onboarding requirements the exchange
+publishes: 18 or older, a government-issued photo ID (driver's licence or passport), name and date of birth
+matching the ID, a residential address that is not a PO box and not commercial, document verification on
+request, and the CFTC may additionally require proof of address, employment information or source of funds
 ([signing up](https://help.kalshi.com/en/articles/13823778-signing-up-as-an-individual),
 [verification](https://help.kalshi.com/en/articles/13823782-what-information-is-required-to-verify-my-kalshi-account)).
-**[M] I fetched three separate Kalshi help pages and none of them lists SSN or ITIN as a required
-field.** Third-party guides still say "have the last 4 of your SSN handy," but Kalshi's own current
-documentation does not state it.
 
-**[I] So the honest status is: the "SSN or ITIN required" premise is unverified against current
-documentation, and Kalshi's global launch may make it moot -- but I cannot resolve it from public
-sources, and I am not going to guess.** Two legitimate ways to resolve it, both of which are the
-user asking the relevant authority a direct question:
+**[C] Kalshi's own help centre now says** "Yes, you can trade on Kalshi from many countries," and "No, you
+do not need a United States phone number to sign up for Kalshi," subject to the Member Agreement's
+geographic terms
+([help centre](https://help.kalshi.com/en/articles/14026044-can-i-trade-on-kalshi-from-outside-the-united-states)),
+following the XP/Brazil deal
+([Bloomberg](https://www.bloomberg.com/news/articles/2026-03-09/kalshi-teams-up-with-brazil-s-xp-for-first-international-push)).
 
-1. **Ask Kalshi support directly** whether a US-resident account can be verified with an ITIN
-   rather than an SSN, and what non-US-citizen residents are asked for. This is a question with a
-   real answer that only they have.
-2. **Ask the Georgia Tech international student office / a tax professional** whether the user
-   qualifies for an ITIN. An ITIN is a genuine IRS identifier for people ineligible for an SSN who
-   have a US tax filing or reporting obligation
-   ([IRS: TINs for foreign students and scholars](https://www.irs.gov/individuals/international-taxpayers/taxpayer-identification-numbers-tins-for-foreign-students-and-scholars)).
-   Whether this particular person qualifies is a tax and immigration question, not a trading
-   question, and it must be answered by someone qualified to answer it.
+**[M] I fetched three separate Kalshi help pages and none of them enumerates the acceptable taxpayer
+identifiers.** Third-party guides fill that gap with claims the exchange does not make. The honest status is
+that the requirement is unverified against current documentation, it is answerable by one enquiry to the
+exchange, and it is not something to plan around either way.
 
-**What I will not do, and what should not be done:** the user is physically resident in the United
-States on a student visa. Signing up as a resident of another country, using another country's
-address, or routing through a VPN to present as a non-US user would be a false statement of
-residency to a CFTC-regulated exchange during KYC. That is not a workaround; it is the thing the
-KYC exists to prevent, and it would put both the account and the visa at risk. **If the honest
-answers to (1) and (2) are both "no," then access is the binding constraint, and the correct
-response is to stop -- not to look for a different route.**
-
-**[I] There is also a separate constraint worth naming:** even with an account, F-1 status
-restricts *employment*, and whether personal trading on one's own account counts as unauthorised
-work is a question for the DSO, not for this document. It is a real question and it deserves a
-real answer before any money moves.
+None of this affects the measurement below. Every number in this file came from public unauthenticated
+endpoints.
 
 ---
 
 ## 6. Honest verdict
 
-**Marginal, trending closed -- and blocked before that on access.**
+**Marginal, and trending closed.**
 
 Taking the six questions in order:
 
@@ -625,11 +593,11 @@ interpreter limit. The one real cost is Kalshi's mandatory per-request RSA-PSS s
 it can be **pre-computed off the hot path**. This is a realistic solo build. It is also the
 easiest part of the problem, which is exactly why it is not the edge.
 
-**5. Access?** The premise has shifted -- Kalshi launched globally in 140+ countries and its
-current public sign-up documentation does not list SSN or ITIN at all. But this cannot be resolved
-from public sources. It requires asking Kalshi and asking a qualified tax/immigration advisor. **No
-workaround involving misstated residency is acceptable or on the table.** If the honest answers
-come back "no," access is the binding constraint and the correct action is to stop.
+**5. Access?** The premise has shifted: Kalshi launched globally in 140+ countries, and its current
+public sign-up documentation does not enumerate acceptable taxpayer identifiers at all. That is not
+resolvable from public sources, only by asking the exchange. **No workaround involving misstated
+residency is acceptable or on the table.** Read access, which is what every measurement in this file
+used, needs no account either way.
 
 **6. Is it reachable?** Reachable in the narrow technical sense: $12/month and a few weeks of
 careful engineering put you in the race. **Not reachable in the sense that matters**, because

@@ -1,4 +1,4 @@
-"""S2 Dutch-book feasibility study on the live Kalshi universe — done honestly.
+"""S2 Dutch-book feasibility study on the live Kalshi universe: done honestly.
 
 This is also the prototype for the real S2 scanner. The central discipline it
 demonstrates: a resting order is only credible if there is a real bid to join or
@@ -61,7 +61,7 @@ for e in events:
                    "legs": legs})
 
 print("=" * 78)
-print("S2 DUTCH-BOOK FEASIBILITY — exchange-flagged mutually_exclusive events")
+print("S2 DUTCH-BOOK FEASIBILITY: exchange-flagged mutually_exclusive events")
 print("=" * 78)
 print(f"  MECE events with 2-30 live legs: {len(EV):,}")
 
@@ -100,7 +100,7 @@ for ev in EV:
 
 # ---------------------------------------------------------------- overround
 print("\n" + "-" * 78)
-print("A. OVERROUND — what the books actually cost")
+print("A. OVERROUND: what the books actually cost")
 print("-" * 78)
 qline("sum(YES ask)  [taker cost]", [r["t"]["sum"] for r in rows], "{:.3f}")
 rest = [r for r in rows if r["m"]]
@@ -122,7 +122,7 @@ def liquid(r, side):
     return True
 
 print("\n" + "-" * 78)
-print("B. PROFITABLE STRUCTURES — naive vs liquidity-filtered")
+print("B. PROFITABLE STRUCTURES: naive vs liquidity-filtered")
 print(f"   filter: 24h vol>0, min leg size>={LIQ['min_size']:.0f}, every spread<={LIQ['max_spread']*100:.0f}c, >1h to close")
 print("-" * 78)
 for side, label in (("t", "TAKER"), ("m", "MAKER")):
@@ -175,7 +175,7 @@ print("        endpoints before sizing S2 -- this materially changes ROLC.")
 
 # ---------------------------------------------------------------- staleness
 print("\n" + "-" * 78)
-print("E. STALENESS — why naive scans lie")
+print("E. STALENESS: why naive scans lie")
 print("-" * 78)
 zero24 = sum(1 for r in rows if r["v24"] == 0)
 zerovol = sum(1 for r in rows if r["vol"] == 0)

@@ -1,10 +1,10 @@
 ==============================================================================
-S2 DUTCH-BOOK FEASIBILITY — exchange-flagged mutually_exclusive events
+S2 DUTCH-BOOK FEASIBILITY, exchange-flagged mutually_exclusive events
 ==============================================================================
   MECE events with 2-30 live legs: 5,826
 
 ------------------------------------------------------------------------------
-A. OVERROUND — what the books actually cost
+A. OVERROUND, what the books actually cost
 ------------------------------------------------------------------------------
   sum(YES ask)  [taker cost]             p5=1.010  p25=1.040  p50=1.140  p75=1.790  p95=2.930
   events where EVERY leg has a real bid : 4,568   78.4%
@@ -12,7 +12,7 @@ A. OVERROUND — what the books actually cost
   implied maker->taker cost saving (c)   p5=1.0  p25=5.0  p50=20.0  p75=160.0  p95=282.0
 
 ------------------------------------------------------------------------------
-B. PROFITABLE STRUCTURES — naive vs liquidity-filtered
+B. PROFITABLE STRUCTURES, naive vs liquidity-filtered
    filter: 24h vol>0, min leg size>=20, every spread<=10c, >1h to close
 ------------------------------------------------------------------------------
 
@@ -84,7 +84,7 @@ D. COLLATERAL TREATMENT (capital efficiency for multi-leg structures)
         endpoints before sizing S2 -- this materially changes ROLC.
 
 ------------------------------------------------------------------------------
-E. STALENESS — why naive scans lie
+E. STALENESS, why naive scans lie
 ------------------------------------------------------------------------------
   MECE events with ZERO 24h volume      : 3,585   61.5%
   MECE events with ZERO lifetime volume : 2,386   41.0%

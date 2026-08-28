@@ -141,7 +141,7 @@ for k in (10, 50, 200, 1000):
     print(f"  top {k:>4} markets = {share*100:5.1f}% of 24h volume")
 
 # ---- Q2 -------------------------------------------------------------------
-print("\n" + "="*78); print("Q2. S1 STRUCTURAL SLEEVE — tradeable favorite band"); print("="*78)
+print("\n" + "="*78); print("Q2. S1 STRUCTURAL SLEEVE: tradeable favorite band"); print("="*78)
 band = [q for q in Q if 0.70 <= q["mid"] <= 0.95]
 def s1_ok(q, min_depth=200.0):
     return (q["hrs"] is not None and 1.0 <= q["hrs"] <= 2160.0
@@ -161,7 +161,7 @@ if s1v:
     print("  by category:", dict(Counter(next(e["category"] for e in EV if e["event"]==q["event"]) for q in s1v).most_common(8)))
 
 # ---- Q4 -------------------------------------------------------------------
-print("\n" + "="*78); print("Q4. S2 DUTCH BOOK — exchange-declared mutually-exclusive events"); print("="*78)
+print("\n" + "="*78); print("Q4. S2 DUTCH BOOK: exchange-declared mutually-exclusive events"); print("="*78)
 mece = [e for e in EV if e["mece"]]
 mece_multi = [e for e in mece if len(e["legs"]) >= 2]
 print(f"  events flagged mutually_exclusive   : {len(mece):,}  {pct(len(mece),len(EV))}")
@@ -203,7 +203,7 @@ if cands:
     print(f"\n  MAKER-profitable AND traded in 24h AND depth>=20: {len(liveish):,}   <-- realistic S2 pipeline")
 
 # ---- Q5 -------------------------------------------------------------------
-print("\n" + "="*78); print("Q5. S3 LINKED RV — structure available"); print("="*78)
+print("\n" + "="*78); print("Q5. S3 LINKED RV: structure available"); print("="*78)
 non_mece_multi = [e for e in EV if not e["mece"] and len(e["legs"]) >= 2]
 print(f"  multi-leg events NOT flagged MECE  : {len(non_mece_multi):,}  <- L2/L3/L4 link candidates")
 print("  by category:", dict(Counter(e["category"] for e in non_mece_multi).most_common(10)))

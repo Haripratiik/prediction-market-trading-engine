@@ -14,7 +14,7 @@ For a contract paying $1 on an event, if `p_t` is a martingale converging to `p_
 Var(p_T | F_t) = E[p_T²] − p_t² = p_t − p_t² = p_t(1 − p_t)
 ```
 
-**The total remaining variance of a binary is `p(1−p)` — closed form, model-free, no volatility parameter,
+**The total remaining variance of a binary is `p(1−p)`, closed form, model-free, no volatility parameter,
 and no dependence on time to expiry.** Time only decides *how* that fixed budget is spread out.
 
 Three separate quantities scale as `p(1−p)`:
@@ -38,7 +38,7 @@ risk, fee, and signal measurement by `p(1−p)` or work in log-odds.**
 | 0.95 | 105 | 100 | 0.0459 | 0.2112 |
 
 Relative spread varies 50× across the book *mechanically*. Use **cents per contract**, **risk units
-(spread ÷ √(p(1−p)))**, or **log-odds**. A 1-cent tick at p=0.02 is a 0.42 log-odds move — **10.4× the
+(spread ÷ √(p(1−p)))**, or **log-odds**. A 1-cent tick at p=0.02 is a 0.42 log-odds move, **10.4× the
 information content** of a 1-cent tick at p=0.50.
 
 ---
@@ -67,9 +67,9 @@ Inverting observed spreads to implied μ is a direct diagnostic:
 | Polymarket p<0.10 | 0.07 | 13c | **43.1%** |
 | Polymarket p<0.10 | 0.07 | 18c | **54.1%** |
 
-Kalshi's mid-book spreads imply 1–2% informed flow — plausible for a retail venue. Polymarket's tail
+Kalshi's mid-book spreads imply 1–2% informed flow, plausible for a retail venue. Polymarket's tail
 spreads would require 43–54% of flow to be perfectly informed, which is not credible. **Those tail spreads
-are not an adverse-selection equilibrium** — they are capital lockup, weak competition, and inventory cost.
+are not an adverse-selection equilibrium**, they are capital lockup, weak competition, and inventory cost.
 That is where room exists, and also where you must ask what else is keeping everyone out.
 
 ### 1.2 Kyle's λ and empirical estimation
@@ -77,7 +77,7 @@ That is where room exists, and also where you must ask what else is keeping ever
 `λ = ½·√Σ₀/σ_u`. Three estimators, cheapest first:
 
 1. **Direct regression** `ΔP_k = α + λ·OF_k + ε` over signed order flow. **On Kalshi you get the taker side
-   from the API — no Lee-Ready needed.**
+   from the API, no Lee-Ready needed.**
 2. Amihud proxy, using `|Δp|/volume` in absolute cents (relative return is meaningless for a binary).
 3. Depth-implied: `λ ≈ 1/(2·AD)` from average top-of-book depth.
 
@@ -96,12 +96,12 @@ VPIN = (1/n) · Σ |2·Z(ΔP_τ/σ) − 1|        ∈ [0,1]
 Otherwise the mechanical `p(1−p)` heteroskedasticity makes VPIN read high in the tails (where a 1-tick move
 is 10× larger in log-odds) and low near 0.50.
 
-**On Kalshi skip BVC entirely** — the API labels the taker side, so use true classification.
+**On Kalshi skip BVC entirely**: the API labels the taker side, so use true classification.
 
 Known failure modes: Andersen & Bondarenko find no incremental predictive power for volatility after
 controlling for volume and volatility; VPIN correlates with both **by construction**. Treat it as a
 regime/kill-switch input, never as alpha. Bartlett & O'Hara did find an adapted VPIN predicts maker losses
-in single-name Kalshi markets specifically, which earns it a place as a **toxicity gate** — validated
+in single-name Kalshi markets specifically, which earns it a place as a **toxicity gate**, validated
 against your own realized mark-outs, not against volatility.
 
 ### 1.4 Mark-out methodology
@@ -116,7 +116,7 @@ Identity          ES ≡ RS(h) + PI(h)
 **For the maker, `markout(h) = RS(h)/2` per contract, exactly.**
 
 Recipe:
-- **Horizons:** compute the whole curve — `1s, 5s, 15s, 60s, 300s, 1800s, and settlement`. The settlement
+- **Horizons:** compute the whole curve, `1s, 5s, 15s, 60s, 300s, 1800s, and settlement`. The settlement
   mark-out is uniquely available in prediction markets and is the only *unbiased* one:
   `markout(∞) = D·(P − Y)` with `Y ∈ {0,1}`. Equities researchers cannot do this. Use it.
 - **Reference price: the microprice (§3.1), not the mid.** In a 1-cent-tick book the mid is badly quantized
@@ -153,7 +153,7 @@ r = p − γ·q·p(1−p)
 > ### The correction that will bite you if you port AS naively
 >
 > In AS the inventory penalty `γσ²(T−t) → 0` as `t → T`, because you liquidate at the mid at T.
-> **In a binary there is no liquidation at the mid — you settle at 0 or 1.** The penalty `γp(1−p)` does
+> **In a binary there is no liquidation at the mid, you settle at 0 or 1.** The penalty `γp(1−p)` does
 > **not** decay with time. **A 50c contract one minute before settlement carries exactly the same
 > per-contract risk as it did a month earlier.**
 >
@@ -200,7 +200,7 @@ The approximation degenerates to nonsense (0.25c) exactly where you most need it
 Feil & Nendel calibrate `k ∈ [35, 85]` → half-spreads of **1.2–2.9c**, consistent with observed Kalshi
 books. Use that as a reality check on your own estimate.
 
-**`γ` — do not estimate from utility. Back it out from your inventory cap:**
+**`γ`, do not estimate from utility. Back it out from your inventory cap:**
 
 ```
 γ = δ_skew_max / (q_max · p(1−p))
@@ -214,8 +214,8 @@ PDE to capture ~95% of the benefit.
 
 ### 2.4 The literature that exists for this exact problem
 
-- **Feil & Nendel (2026), *Optimal Market Making in Prediction Markets*, [arXiv:2607.17991](https://arxiv.org/abs/2607.17991)** — the direct paper. Terminal penalty `Φ(p,q) = −γ_T q² p(1−p)`. Findings: spreads widen near settlement at p=½; inventory skew reverses sign at p=½. Monte Carlo vs myopic baseline: P&L −0.6% but **sd −63%, 5% VaR −87%, terminal inventory −69%**.
-- **Xi, Moallemi, Pai & Wang (2026), [arXiv:2607.08199](https://arxiv.org/html/2607.08199)** — the volatility model to plug in: `h² = p(1−p)/τ + K·ν(V)·s²/4` with `ν(V)=√V`, **one free parameter**. Fitted on 880,719 Kalshi contract-hours; 40% better interval score than GARCH(1,1); **globally pooled parameters beat category-specific refits.**
+- **Feil & Nendel (2026), *Optimal Market Making in Prediction Markets*, [arXiv:2607.17991](https://arxiv.org/abs/2607.17991)**, the direct paper. Terminal penalty `Φ(p,q) = −γ_T q² p(1−p)`. Findings: spreads widen near settlement at p=½; inventory skew reverses sign at p=½. Monte Carlo vs myopic baseline: P&L −0.6% but **sd −63%, 5% VaR −87%, terminal inventory −69%**.
+- **Xi, Moallemi, Pai & Wang (2026), [arXiv:2607.08199](https://arxiv.org/html/2607.08199)**: the volatility model to plug in: `h² = p(1−p)/τ + K·ν(V)·s²/4` with `ν(V)=√V`, **one free parameter**. Fitted on 880,719 Kalshi contract-hours; 40% better interval score than GARCH(1,1); **globally pooled parameters beat category-specific refits.**
 - Guéant–Lehalle–Fernandez-Tapia closed forms; Guéant (2017) reduces the HJB to a **tridiagonal linear ODE in inventory**, solvable by matrix exponential.
 
 ---
@@ -225,7 +225,7 @@ PDE to capture ~95% of the benefit.
 ### 3.1 The parameter-free imbalance formula
 
 Cont & de Larrard (2013). For a balanced book, `P(next move is up)` given queue sizes has an exact integral
-form — and a closed-form approximation **verified numerically to ±0.0005 for queues ≥ 5**:
+form, and a closed-form approximation **verified numerically to ±0.0005 for queues ≥ 5**:
 
 ```
 P(mid up) ≈ (2/π) · arctan(q_bid / q_ask)
@@ -237,10 +237,10 @@ P(mid up) ≈ (2/π) · arctan(q_bid / q_ask)
 | naive imbalance `bid/(bid+ask)` | 0.0452 | 0.0279 |
 
 **Use arctan, not linear imbalance.** The naive form is biased toward 0.5 by up to **4.5 probability
-points** — on a 1-cent tick against a $1 contract that is 4.5 cents of fair-value error, larger than the
+points**, on a 1-cent tick against a $1 contract that is 4.5 cents of fair-value error, larger than the
 entire spread. It requires **no calibration whatsoever** in the balanced case.
 
-Two companion results: duration between price moves is **heavy-tailed with infinite mean** — never report
+Two companion results: duration between price moves is **heavy-tailed with infinite mean**, never report
 an "average time to fill", use quantiles. And volatility can be estimated from order flow alone via
 `σ = δ√(nπλ/D(f))`.
 
@@ -250,15 +250,15 @@ Stoikov (2018). Build an absorbing Markov chain over (spread bucket, imbalance b
 has not yet moved; then `microprice = mid + G*[state]` with `G* = (I − B)^{-1}G1`. Six terms of the series
 suffice.
 
-**In a 1-cent-tick binary book the mid is badly quantized** — it lives on a half-cent grid while fair value
+**In a 1-cent-tick binary book the mid is badly quantized**: it lives on a half-cent grid while fair value
 moves continuously. Use the microprice as the fair-value reference everywhere, especially in mark-outs.
 
 **In thin books**, top-of-book imbalance is dominated by one participant's order. Two defenses:
-(a) compute imbalance over **cumulative top-N levels** — Polymarket depth is near-uniform across levels
+(a) compute imbalance over **cumulative top-N levels**, Polymarket depth is near-uniform across levels
 (median L1/top-10 = 0.137 vs 0.10 for uniform), so L1-only discards most of the information;
 (b) **subtract your own resting size** before computing imbalance.
 
-### 3.3 Estimating queue position — and Kalshi's gift
+### 3.3 Estimating queue position: and Kalshi's gift
 
 Standard practitioner model (hftbacktest): assume you join at the back; queue advances only on trades;
 cancellations are probabilistically attributed ahead/behind with a pessimism dial `n ∈ [1,3]`.
@@ -266,7 +266,7 @@ cancellations are probabilistically attributed ahead/behind with a pessimism dia
 > **Kalshi exposes ground truth: `GET /orders/{order_id}/queue_position` returns `queue_position_fp`, the
 > number of preceding shares ahead of your order.**
 >
-> Use it twice: (a) live, feed real `q` into the fill model; (b) **as a labelled training set** — record
+> Use it twice: (a) live, feed real `q` into the fill model; (b) **as a labelled training set**, record
 > `(q_true, L2 history)` pairs and fit `n` so the L2-only estimator reproduces `q_true`, then freeze `n` and
 > use it for historical backtesting where the endpoint is unavailable.
 >
@@ -282,7 +282,7 @@ V = α(q) · (δ − AS(q))
     α = fill probability     δ = spread premium     AS = adverse-selection cost
 ```
 
-Fit `α(q) = α_∞ + (α_0 − α_∞)·e^{−bq}` to your realized fills bucketed by join depth — three parameters,
+Fit `α(q) = α_∞ + (α_0 − α_∞)·e^{−bq}` to your realized fills bucketed by join depth, three parameters,
 and the right functional form even without the full model.
 
 **Join-vs-improve.** With edge `E`, tick `Δ`, adverse selection `AS`:
@@ -300,11 +300,11 @@ improve iff   α_imp/α_join > (E − AS) / (E − Δ − AS)
 | 5.0c | 0.5c | 1.29× |
 
 **On a 1-cent tick, unless your edge is ≥ 3c, improving must double or triple your fill probability to
-break even — and it rarely does.** Moallemi & Yuan measured the *entire* front-to-back queue value at
+break even, and it rarely does.** Moallemi & Yuan measured the *entire* front-to-back queue value at
 0.21–0.26 ticks. **Join the queue; do not penny.** The exception is a queue so long that `α_join → 0`; the
 exponential fit gives a critical length `Q*` above which improving wins.
 
-### 3.5 Adverse selection increases with queue depth — the common intuition is backwards
+### 3.5 Adverse selection increases with queue depth: the common intuition is backwards
 
 `AS(q) = β(q)/α(q)` is **increasing in q**: orders at the back of a long queue get filled by *large* trades,
 and large trades carry more impact. Empirically 0.3 ticks at the front → 0.7 ticks deep.
@@ -313,7 +313,7 @@ and large trades carry more impact. Empirically 0.3 ticks at the front → 0.7 t
 precisely why queue position has value.
 
 Independent confirmation: a one-sd increase in contracts ahead reduces average order size by 20%, versus
-7.5% for a one-sd inventory increase — **adverse-selection risk drives sizing 2.6× as strongly as inventory
+7.5% for a one-sd inventory increase, **adverse-selection risk drives sizing 2.6× as strongly as inventory
 risk.**
 
 **But do not chase imbalance.** Albers et al. (2025) find a *negative* correlation between fill likelihood
@@ -331,7 +331,7 @@ Lo, MacKinlay & Zhang (JFE 2002) constructed hypothetical fills two ways against
 
 **Touch-fill overstates fill speed ~1.6×; trade-through understates ~2.4×; the bounds are ~3.9× apart.**
 Report the bracket, not a point. **If a strategy is only profitable at the optimistic bound, it does not
-exist.** They also treat cancellations as **censored, not as non-fills** — a bias most backtests get wrong.
+exist.** They also treat cancellations as **censored, not as non-fills**, a bias most backtests get wrong.
 
 **The calibration gate that catches a too-generous fill model.** Realized adverse-fill rates on CME futures
 (April 2024): ES **81.5%**, NQ **65.8%**, CL **82.9%**, ZN **88.8%**.
@@ -339,11 +339,11 @@ exist.** They also treat cancellations as **censored, not as non-fills** — a b
 > **Two-thirds to nine-tenths of maker fills are immediately adverse. If your simulator produces ~50%
 > adverse fills, it is handing you fills the real market would not have.**
 
-Concrete rules: (1) fill a resting bid at `p` only when a trade prints strictly *below* `p` — a print *at*
+Concrete rules: (1) fill a resting bid at `p` only when a trade prints strictly *below* `p`, a print *at*
 `p` means someone ahead of you filled; (2) never let `front_q_qty` increase except via `min(front, new_qty)`;
 (3) residual after a partial stays at the **front**; (4) model feed and order latency separately and
 **simulate cancels as sometimes losing the race**; (5) queue resets on any reprice; (6) fees at the correct
-granularity — Kalshi rounds **per order**, so a 1-lot at 50c pays ⌈1.75⌉ = 2c, a **14% rounding penalty**
+granularity, Kalshi rounds **per order**, so a 1-lot at 50c pays ⌈1.75⌉ = 2c, a **14% rounding penalty**
 versus the 100-lot rate.
 
 **Count fill-model choices (`n`, latency, fill rule) as trials.** Calibrate `n` against held-out live fills,
@@ -375,7 +375,7 @@ Post iff   θ > θ* = take_edge / make_edge_conditional
 **A taker round trip costs 1.26 ticks at p=0.10, 2.94 at p=0.30, 3.50 at p=0.50.** In a market whose entire
 spread is 1–3c, **round-tripping as a taker is structurally unprofitable.** Almost everything must be maker.
 
-### 4.2 Square-root impact — the capacity constraint retail bots violate most
+### 4.2 Square-root impact: the capacity constraint retail bots violate most
 
 Adapted to binaries (absolute price, remaining sd):
 
@@ -392,7 +392,7 @@ Using Kalshi's actual size distribution (median $8,982 staked ≈ 18,000 contrac
 | 0.50 | 18,000 | 2,000 | 8.33c | 16.67c |
 | 0.50 | 120,000 | 500 | 1.61c | 3.23c |
 
-> **A 500-contract order — $250 at 50c — moves the median Kalshi market 4–8 cents.**
+> **A 500-contract order, $250 at 50c, moves the median Kalshi market 4–8 cents.**
 >
 > At retail scale **you are already a large trader in the median prediction market.** Size relative to
 > market volume, not relative to bankroll. This is the single most-violated constraint in retail bots.
@@ -410,7 +410,7 @@ Fraction of a signal surviving execution horizon `T` with half-life `h` is `2^(�
 | 600s | 99.4% | 96.6% | 87.1% | 50.0% |
 
 **Your execution horizon must be well under your signal half-life.** At retail latency (50–500ms, REST/WS,
-no colocation) any sub-second signal is unreachable — do not build strategies that need them. Order-book
+no colocation) any sub-second signal is unreachable, do not build strategies that need them. Order-book
 imbalance decays in tens of milliseconds in liquid venues but far slower in thin prediction-market books,
 which is exactly why retail participation is viable here and not in equities.
 
@@ -418,7 +418,7 @@ which is exactly why retail participation is viable here and not in equities.
 
 Kalshi token bucket: Basic 200 reads / 100 writes per second. **Most requests cost 10 tokens; cancellations
 cost 2.** Batch items bill separately (25 creates = 250 tokens). Breach returns 429 **with no `Retry-After`
-or `X-RateLimit-*` headers** — implement bounded exponential backoff yourself.
+or `X-RateLimit-*` headers**, implement bounded exponential backoff yourself.
 
 > **Cancels are 5× cheaper than creates. Structure the quoter to cancel aggressively and re-create
 > selectively, not to churn creates.**
@@ -440,7 +440,7 @@ No fat tails outside [0,1], no gap risk beyond settlement. **`p(1−p)` is your 
 `Σ q_i² p_i(1−p_i)` across the book, not `Σ|q_i|`.**
 
 **YES/NO netting.** 1 YES + 1 NO = $1 guaranteed. Holding `q_Y` YES and `q_N` NO gives payoff
-`q_N + (q_Y − q_N)·1{event}` — so **net exposure is `δ = q_Y − q_N` and `min(q_Y,q_N)` is riskless cash.**
+`q_N + (q_Y − q_N)·1{event}`, so **net exposure is `δ = q_Y − q_N` and `min(q_Y,q_N)` is riskless cash.**
 A YES bid at `b` *is* a NO ask at `1−b`; there is one book, mirrored, and the YES spread equals the NO
 spread identically. For multi-outcome events the analogue of a Greek is the **vector of net exposures across
 mutually exclusive outcomes**, subject to `Σp_i = 1`. Hedge at the event level, not the ticker level.
@@ -452,10 +452,10 @@ paid = 1 − spread     received = $1 at settlement     profit = a − b = the q
 capital ≈ $1 per contract-pair
 ```
 
-At a hypothetical 1.75% maker rate, a **1-cent spread at p=0.50 nets 0.12c — essentially nothing**; you
+At a hypothetical 1.75% maker rate, a **1-cent spread at p=0.50 nets 0.12c, essentially nothing**; you
 need ≥2c of spread to quote two-sided at the money. Because the fee is `∝ p(1−p)`, it bites hardest at
-p≈0.5 and is 3× cheaper in the tails. *(On Kalshi, maker fees apply to only 130 of 13,486 series — see
-`06-kalshi-structure.md` §4 — so on most series this constraint vanishes.)*
+p≈0.5 and is 3× cheaper in the tails. *(On Kalshi, maker fees apply to only 130 of 13,486 series, see
+`06-kalshi-structure.md` §4, so on most series this constraint vanishes.)*
 
 **Capital efficiency:** there is no leverage; a two-sided quote locks ~$1 per contract-pair. At a 2c net
 spread and one turn per day, gross ≈ 2% of bankroll per day *before* adverse selection, which is where most
@@ -466,7 +466,7 @@ spread capture.**
 
 ## 6. Prediction-market empirics that matter for quoting
 
-### 6.1 Kalshi (Bürgi, Deng & Whelan, Jan 2026 — 313,972 contract prices)
+### 6.1 Kalshi (Bürgi, Deng & Whelan, Jan 2026: 313,972 contract prices)
 
 - **Median money staked per contract: $8,982.** Mean $61,977. Top decile $526,245.
 - **Mean transaction $100; median $35.** These are retail-scale books.
@@ -474,17 +474,17 @@ spread capture.**
 - Favorite–longshot bias: average pre-fee return **−20%**; contracts ≤10c lose **>60%**; contracts >70c earn
   a small significant positive post-fee return. **Makers −9.64%, takers −31.46%; makers buying ≥50c +2.6%.**
 - Mincer–Zarnowitz `ψ = 0.034 (SE 0.005)`, break-even price **≈51c**. Rejected at **every** horizon.
-- By year: 2024 ψ=0.048 → 2025 ψ=**0.021** — weakening, not vanished.
-- By transaction-size quintile: Q1 0.036 → **Q5 0.043**. **The largest trades show the largest bias — size
+- By year: 2024 ψ=0.048 → 2025 ψ=**0.021**, weakening, not vanished.
+- By transaction-size quintile: Q1 0.036 → **Q5 0.043**. **The largest trades show the largest bias, size
   does not arbitrage it away.**
 - **Maker share of purchases rises monotonically with price: 43.5% at 1–10c → 56.5% at 90–99c.**
 
-> **Implication for the quoter, and it is precise:** the maker edge on Kalshi is not purely spread capture —
+> **Implication for the quoter, and it is precise:** the maker edge on Kalshi is not purely spread capture,
 > a material part is harvesting a directional behavioral bias. **Your inventory will drift systematically
 > short YES in longshot markets.** That is a real edge with negative skew. Take it deliberately and size it,
-> or hedge it out — but never let it accumulate by accident.
+> or hedge it out, but never let it accumulate by accident.
 
-### 6.2 Polymarket order books (Dubach 2026 — ~30 billion events, 623.8 GB)
+### 6.2 Polymarket order books (Dubach 2026: ~30 billion events, 623.8 GB)
 
 | Finding | Number |
 |---|---|
@@ -497,12 +497,12 @@ spread capture.**
 > **Critical warning for anyone backtesting the public feed:** feed-inferred trade direction agrees with
 > on-chain ground truth on only **~59% of buckets**. Downstream **sign-flip rates are 67% for effective
 > half-spread and 60% for Kyle's λ.** If you infer direction from the public book, your adverse-selection
-> estimates are coin flips. Use on-chain ground truth — or trade Kalshi, where the venue labels the taker.
+> estimates are coin flips. Use on-chain ground truth, or trade Kalshi, where the venue labels the taker.
 
 ### 6.3 Liquidity is bimodal, not continuous
 
 Whelan (2026) on Betfair (200,000+ matches, full book at 1-second intervals): the model produces **multiple
-equilibria — thick and thin**. When matching probability is high, makers need less price improvement, so
+equilibria, thick and thin**. When matching probability is high, makers need less price improvement, so
 spreads tighten, which raises matching further; when it is low, makers demand wider spreads, which reduces
 matching further.
 
@@ -534,21 +534,21 @@ manipulators captured **$8.2M**; order-flow spike ~3.9× larger in near-the-mone
 - **Key concept: payoff-space no-arbitrage ≠ protocol-executable no-arbitrage.** A bundle violation need not
   be exploitable given actual conversion mechanics.
 - PredictIt's persistent 250–290c candidate sums existed because a **10% fee on profit** creates a hard
-  wedge — minimum profitable bid-sum was **$1.11**. **Violation persistence is governed by
+  wedge, minimum profitable bid-sum was **$1.11**. **Violation persistence is governed by
   `fee structure × position limit × capital recycling`, not by how many people can see it.**
 
 ---
 
 ## 7. Build order and validation gates
 
-**Tier 1 — no calibration required:**
-1. `P(mid up) = (2/π)·arctan(q_bid/q_ask)` — replaces linear imbalance (wrong by up to 4.5 points).
+**Tier 1, no calibration required:**
+1. `P(mid up) = (2/π)·arctan(q_bid/q_ask)`, replaces linear imbalance (wrong by up to 4.5 points).
 2. Fair value = microprice over cumulative top-N depth, with your own size subtracted.
 3. Quotes: `r = p_micro − γ·q·p(1−p)`; `ψ = max(tick, (2/γ)ln(1+γ/k) + γ·p(1−p))`; `γ = δ_skew_max/(q_max·p(1−p))`.
 4. Kalshi `queue_position` in the live loop; explicit `self_trade_prevention_type`; `post_only` on all quotes.
 5. Every backtest reported under **both** touch-fill and trade-through.
 
-**Tier 2 — cheap calibration:**
+**Tier 2, cheap calibration:**
 6. `k` from your own fill-rate-vs-distance data.
 7. `α(q) = α_∞ + (α_0−α_∞)e^{−bq}` fit to realized fills bucketed by join depth.
 8. Join-vs-improve with critical queue length `Q*`.
@@ -570,7 +570,7 @@ tridiagonal ODE with `p` frozen over short re-solve intervals.
 
 **Three things to expect to be wrong about:**
 - Cancellation rate is **not** linear in queue size (increasing-concave, then flat).
-- Duration between price moves has **infinite mean** in the balanced regime — never report an average
+- Duration between price moves has **infinite mean** in the balanced regime, never report an average
   time-to-fill.
 - Pure order-book-driven simulators generate **~1/3** of realistic volatility, so a backtest will
   systematically understate adverse selection unless exogenous jumps are injected.
@@ -580,7 +580,7 @@ tridiagonal ODE with `p` frozen over short re-solve intervals.
 
 ---
 
-## 9. Execution tactics — page-verified mechanics
+## 9. Execution tactics: page-verified mechanics
 
 ### 9.1 The maker/taker crossover: a price-dependent policy, not a constant
 
@@ -612,7 +612,7 @@ edge required to prefer crossing = 2.31c/contract = 4.6% of price
 ```
 
 **The maker/taker policy must be a function of price level.** Deep OTM contracts (p < 8% or p > 92%) invert
-the economics — there the flat tick dominates and the fee is nearly free.
+the economics, there the flat tick dominates and the fee is nearly free.
 
 Note this is a *different* question from the fee-death-zone rule (`fee/price > 0.04`). That one asks whether
 a trade is worth doing at all in edge terms; this one asks whether to cross or post. Both hold at once: at
@@ -632,7 +632,7 @@ POST  EV = α · [ A·e^(−E[t]/τ_α) + (p−b) − f_m − AS ]
 α*       = [A − (a−p) − f_t] / [A·e^(−E[t]/τ_α) + (p−b) − f_m − AS]
 ```
 
-Cross iff estimated `α < α*`. **If `α* ≤ 0`, crossing is EV-negative at any fill probability — post
+Cross iff estimated `α < α*`. **If `α* ≤ 0`, crossing is EV-negative at any fill probability, post
 unconditionally.** At fair 49.5c with bid 49 / ask 50, crossing is EV-negative until edge exceeds ~2.25c,
 and even at 5c of edge you should still post unless estimated fill probability is below ~0.70.
 
@@ -653,19 +653,19 @@ Two results that should reshape intuition:
    redistributes who wins the race.
 2. **Depth (eq. 6.4): the sniping cost is identical at every level** (snipers take all available size at a
    stale price) while the revenue term **shrinks** with depth. **Therefore your size ladder should thin out
-   fast beyond the touch — because of pick-off risk, not inventory risk.** This is a different rationale
+   fast beyond the touch, because of pick-off risk, not inventory risk.** This is a different rationale
    than the usual one and produces a steeper taper.
 
 Empirics: ES–SPY arbitrage median duration fell **97 ms (2005) → 7 ms (2011)** while per-unit profitability
 stayed **constant** at ~0.08 index points. Arbitrage frequency is explained almost entirely by "distance
-travelled" — realized volatility. **So make your spread scale with short-horizon realized volatility; that
+travelled", realized volatility. **So make your spread scale with short-horizon realized volatility; that
 falls out of the model rather than being a heuristic.**
 
 > At 50–500 ms you are, definitionally, always the sniped party and never the sniper. You cannot win the
-> race; do not enter it. **On a firm CLOB you have no last look — your quotes are options you have written
+> race; do not enter it. **On a firm CLOB you have no last look, your quotes are options you have written
 > for free**, and that option's value to the taker rises with volatility and with your latency.
 
-### 9.4 Alpha decay — corrected
+### 9.4 Alpha decay: corrected
 
 For an execution schedule spread over `[0,T]`, the fraction *captured* is not `2^(−T/h)` but:
 
@@ -686,10 +686,10 @@ away 37%.**
 
 Optimal horizon with Almgren-2005 temporary impact:
 `T* = [2·τ_α·β·η·σ·(X/V)^β / A₀]^(1/(1+β))`. **When `X/V` is large relative to a fast-decaying signal there
-is no interior optimum — the correct action is to shrink the order or skip the trade. Code that as an
+is no interior optimum, the correct action is to shrink the order or skip the trade. Code that as an
 explicit gate**, not a schedule that silently loses money.
 
-Gârleanu & Pedersen (2013): "**aim in front of the target**, trade partially toward the current aim" —
+Gârleanu & Pedersen (2013): "**aim in front of the target**, trade partially toward the current aim",
 predictors with slower mean reversion get more weight in the aim portfolio.
 
 ### 9.5 Almgren–Chriss, verified (with an erratum)
@@ -700,14 +700,14 @@ x_j  = X · sinh(κ(T−t_j)) / sinh(κT)          κ ≈ √(λσ²/η̃)
 half-life θ = 1/κ                              independent of the imposed horizon T
 ```
 
-`½γX²` and `ε|X|` are **schedule-independent** — only the `η̃` term is controllable. With alpha, the
+`½γX²` and `ε|X|` are **schedule-independent**, only the `η̃` term is controllable. With alpha, the
 trajectory is the zero-drift sinh solution **plus a constant correction `x̄ = α/(2λσ²)`, independent of X**:
 alpha changes your terminal target, not your decay rate. Rather than guessing risk aversion, pick the
 half-life you want and invert: `λ = η/(σ²θ²)`.
 
 > **Erratum, independently verified:** the working paper's body text on p.26 gives `x̄ ≈ 1,100 shares`.
 > With the paper's own Table 1 parameters the correct value is **11,080 shares**, matching Table 1's
-> "11,000". **The body text is off by 10× — calibrate off Table 1.**
+> "11,000". **The body text is off by 10×, calibrate off Table 1.**
 
 Calibrated impact (Almgren, Thum, Hauptmann & Li 2005, 29,509 Citigroup orders):
 
@@ -715,12 +715,12 @@ Calibrated impact (Almgren, Thum, Hauptmann & Li 2005, 29,509 Citigroup orders):
 J = I/2 + sgn(X)·η·σ·(X/(V·T))^(3/5)        γ = 0.314 ± 0.041     η = 0.142 ± 0.0062
 ```
 
-**They reject β = 1/2 at 95% confidence** — the exponent is 3/5, not the folklore square root. R² < 1%: the
+**They reject β = 1/2 at 95% confidence**: the exponent is 3/5, not the folklore square root. R² < 1%: the
 model explains the mean, never a single order. For prediction markets, drop the liquidity factor and refit
 `η` on your own fills; 0.142 is a US large-cap number and will not transfer. Published δ range across
 studies is [0.4, 0.7].
 
-### 9.6 Adverse-selection magnitudes — the number that should worry you
+### 9.6 Adverse-selection magnitudes: the number that should worry you
 
 Moallemi–Yuan Table 3 (model vs backtest, 30 days, **in ticks**):
 
@@ -740,25 +740,25 @@ informed. **Front-of-queue acts as a filter on the counterparty population.** Fo
 50–500 ms who will systematically lose the queue race, **your passive fills are systematically the toxic
 subset. Budget `AS` at the high end of any range you estimate.**
 
-### 9.7 Amend vs cancel-replace — the concrete priority rules
+### 9.7 Amend vs cancel-replace: the concrete priority rules
 
 **Any modification loses time priority except a reduction in quantity** (verified against Cboe EDGX, Nasdaq
 Options, and CME rules).
 
 1. **Never amend to increase size.** Leave the original resting and submit a **second, separate order** for
-   the increment — you keep priority on the first tranche.
-2. **Amend down freely** — the one free operation.
+   the increment, you keep priority on the first tranche.
+2. **Amend down freely**: the one free operation.
 3. **Reprice only outside a hysteresis band** sized to the queue value forfeited. Reprice iff the
    improvement in `α(δ − AS)` exceeds the queue value destroyed; given queue value up to ~0.2 ticks against
    a 1-tick spread, a reprice is expensive.
 4. **On a partial fill the residual keeps its queue position.** Do not cancel and re-post the residual to
-   tidy up — that is a pure priority donation.
+   tidy up, that is a pure priority donation.
 5. Prefer atomic amend-in-place over cancel-then-new: the latter has a window where you are off the book
    *and* a window where both sides can be live (the self-cross problem).
 6. **Instrument `amend_count / fill_count`.** If it rises, your fair-value model is noisier than your
-   spread — widen rather than chase.
+   spread, widen rather than chase.
 
-### 9.8 Self-trade prevention — mode choice and the regulatory posture
+### 9.8 Self-trade prevention: mode choice and the regulatory posture
 
 | Mode | Mechanics |
 |---|---|
@@ -768,27 +768,27 @@ Options, and CME rules).
 | Decrement & Cancel | Cancel the smaller, decrement the larger |
 
 **Precedence: the taker's STP instruction governs, overriding the resting order's setting.** Matching is on
-account *or* shared trade-group ID — relevant if you run multiple API keys or sub-accounts.
+account *or* shared trade-group ID, relevant if you run multiple API keys or sub-accounts.
 
-**Pick Cancel Newest for a two-sided quoter** — your resting liquidity survives and only the erroneous new
+**Pick Cancel Newest for a two-sided quoter**: your resting liquidity survives and only the erroneous new
 order dies. **Cancel Oldest is dangerous:** a repricing burst can strip you off the book entirely.
 
 Prevent self-crosses in your own logic first (maintain an internal book; never submit a bid ≥ your live
 ask) and treat exchange STP as the backstop, **with alerting on every trigger**. A rising prevented-match
 rate means your two sides are converging and your quoting logic has a bug.
 
-**Regulatory:** CEA §4c(a) prohibits wash/fictitious sales — the CFTC hook, directly applicable to Kalshi as
+**Regulatory:** CEA §4c(a) prohibits wash/fictitious sales, the CFTC hook, directly applicable to Kalshi as
 a designated contract market. FINRA 5210 and Notice 14-28 draw the line at **intent**: unintentional
 self-trades from one firm with no change in beneficial ownership are generally bona fide, but you must have
 procedures to prevent *patterns* of them. **Turning STP on, logging every trigger, and being able to show
 the two sides are one strategy is the defensible posture. Turning STP off to get more fills is the thing
 not to do.**
 
-### 9.9 Iceberg detection — retail-implementable, and it corrects your fill model
+### 9.9 Iceberg detection: retail-implementable, and it corrects your fill model
 
 Needs only the public trade tape plus L2 snapshots. Maintain per-price-level state; **when
 `traded_volume_at_level > displayed_volume_before_trade`, the excess is hidden size.** Build a per-market
-empirical distribution of `hidden/displayed`. For size prediction use a **Kaplan–Meier survival estimator** —
+empirical distribution of `hidden/displayed`. For size prediction use a **Kaplan–Meier survival estimator**,
 correct because orders cancelled after partial execution make total peak size right-censored.
 
 Prevalence (Frey & Sandås, Xetra): **9.3% of submitted and 15.9% of executed shares** involve icebergs;
@@ -833,4 +833,4 @@ Amendments to the Tier list in §7:
   directly from the API, which supersedes secondary sources.
 - **Nobody has published spread and depth dynamics in the *seconds* around a Kalshi CPI or FOMC print.**
   The qualitative claim is asserted but unquantified. **Your own recorder would produce a novel result
-  here** — a cheap, publishable by-product of Gate 1.
+  here**, a cheap, publishable by-product of Gate 1.

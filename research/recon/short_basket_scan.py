@@ -75,7 +75,7 @@ for e in events:
                    "crt":e.get("collateral_return_type") or "?"})
 
 print("="*80)
-print("S2-SHORT — SELLING MUTUALLY-EXCLUSIVE BASKETS (the structurally safe direction)")
+print("S2-SHORT: SELLING MUTUALLY-EXCLUSIVE BASKETS (the structurally safe direction)")
 print("="*80)
 print(f"  MECE events with 2-90 live legs: {len(EV):,}")
 print(f"  collateral_return_type values  : {dict(Counter(x['crt'] for x in EV))}")

@@ -1,25 +1,25 @@
-# Systematic Strategies & Documented Edges — Research Notes, August 2026
+# Systematic Strategies & Documented Edges: Research Notes, August 2026
 
 ## Context
 - Kalshi taker fee peaks 1.75¢/contract at 50¢; maker = 25% of taker. Polymarket fee V2 (2026): takers pay by category (crypto 0.07 coeff, sports, finance/politics…), makers zero + rebates.
 - **Institutionalization is the defining 2026 trend:** Susquehanna (SIG) = Kalshi's flagship market maker (dedicated desk since 2023); Jump Trading doubled its PM team to ~20 and took equity in both venues; **Cantor Fitzgerald opened Kalshi block trading to ~3,000 institutional clients Aug 2026** ([CNBC](https://www.cnbc.com/2026/08/19/hedge-funds-are-about-to-jump-in-big-to-prediction-markets.html), [CoinDesk](https://www.coindesk.com/markets/2026/08/19/cantor-opens-kalshi-prediction-markets-to-thousands-of-institutional-clients)). Edges are compressing.
 
-## 1. Favorite-longshot bias (FLB) — best-documented structural edge
+## 1. Favorite-longshot bias (FLB): best-documented structural edge
 
-**Bürgi, Deng & Whelan (UCD, Jan 2026), "Makers and Takers: The Economics of the Kalshi Prediction Market"** — 46,282 Yes contracts / 313,972 priced sides, 2021–Apr 2025 ([PDF](https://www.karlwhelan.com/Papers/Kalshi.pdf), [CEPR column](https://cepr.org/voxeu/columns/economics-kalshi-prediction-market)):
+**Bürgi, Deng & Whelan (UCD, Jan 2026), "Makers and Takers: The Economics of the Kalshi Prediction Market"**: 46,282 Yes contracts / 313,972 priced sides, 2021–Apr 2025 ([PDF](https://www.karlwhelan.com/Papers/Kalshi.pdf), [CEPR column](https://cepr.org/voxeu/columns/economics-kalshi-prediction-market)):
 - Buyers of contracts <10¢ lose **>60%**. Contracts >70¢ earn statistically significant positive post-fee returns (95¢ wins ~98% → +3.1% pre-fee).
 - **Makers −9.64% avg vs Takers −31.46%. Makers buying ≥50¢ earned +2.6% post-fee, std dev 33%.**
 - FLB largest in crypto (ψ=0.058) and single-contract markets; weakening over time (2024 ψ=0.048*** → 2025 ψ=0.021*).
 - Why not competed away: tiny capacity (median market ~$8,982 total staked; top-decile avg final volume $526k; mean transaction $100), variance (33% SD vs 2.6% mean), ignorance.
 
 **Domain calibration (arXiv:2602.19520, 292M trades both platforms)** ([HTML](https://arxiv.org/html/2602.19520v1)):
-- **Politics: UNDERconfident** — a 70¢ political contract a week out is really ~83% → buy political favorites.
+- **Politics: UNDERconfident**: a 70¢ political contract a week out is really ~83% → buy political favorites.
 - **Sports: well-calibrated 0–48h**; underconfident beyond 1 month (slope 1.74) → long-dated favorites cheap.
-- **Weather: OVERconfident short-term** (fat tails underpriced) — reverse-FLB. Don't blindly sell weather longshots.
+- **Weather: OVERconfident short-term** (fat tails underpriced), reverse-FLB. Don't blindly sell weather longshots.
 - **Crypto & finance: near-perfectly calibrated** (hedgeable reference assets → no free lunch).
 - **FLB worsens with time-to-expiry** (slope 0.99 <1h → 1.32 >1mo). Recalibration: p* = p^θ / (p^θ + (1−p)^θ).
 
-**Bartlett & O'Hara 2026 (41.6M trades): structural NO-side bias** — in single-name "Will [person] do X" markets, traders buy YES ~61% of the time but YES resolves true only ~32% ([Stanford Law](https://law.stanford.edu/2026/04/21/adverse-selection-in-prediction-markets-evidence-from-kalshi/), [SSRN](https://papers.ssrn.com/sol3/Delivery.cfm/6615739.pdf?abstractid=6615739&mirid=1)).
+**Bartlett & O'Hara 2026 (41.6M trades): structural NO-side bias**: in single-name "Will [person] do X" markets, traders buy YES ~61% of the time but YES resolves true only ~32% ([Stanford Law](https://law.stanford.edu/2026/04/21/adverse-selection-in-prediction-markets-evidence-from-kalshi/), [SSRN](https://papers.ssrn.com/sol3/Delivery.cfm/6615739.pdf?abstractid=6615739&mirid=1)).
 
 **Exploitation:** sell longshots / buy favorites **as a maker**; prefer crypto/single-name/long-horizon-politics categories; avoid sub-15¢ "fee death zone." Low-single-digit % returns, fat left tail, capacity low-five-figures.
 
@@ -29,7 +29,7 @@
 - Tooling commoditized (open-source scanners, PredTerminal, Claw Arbs). Residual alpha: long-tail unmapped events, "fuzzy" arbs with wording risk (= informed RV, not arb).
 
 ## 3. Intra-platform arbitrage
-- YES+NO < $1 buy-both; mint-and-sell-both when > $1. **NegRisk multi-outcome:** ΣYES < $1 buy all; ΣYES > 100% buy all NO + convert (industrialized — an 8-wallet operation harvests across 10,000 markets).
+- YES+NO < $1 buy-both; mint-and-sell-both when > $1. **NegRisk multi-outcome:** ΣYES < $1 buy all; ΣYES > 100% buy all NO + convert (industrialized, an 8-wallet operation harvests across 10,000 markets).
 - **Saguillo et al. (arXiv:2508.03474): ~$40M of arb extracted on Polymarket Apr 2024–Apr 2025** across >7,000 markets ([abs](https://arxiv.org/abs/2508.03474)).
 - **UCLA NBA microstructure study (arXiv:2605.00864), Feb–Mar 2026, 75M book snapshots:** single-market arb virtually extinct (7 episodes/month, median 3.6s, ~$210 total); combinatorial (ML vs spread) 290 episodes/mo, median 101bps, **average executable size 14.8 shares, $559.59/month total capped profit across 173 games**. 81% of raw signals were phantom post-game artifacts. Residual inefficiency "structurally confined to the retail tier."
 - 2024 election: deviation half-lives collapsed to **0.67–0.74 min**; Kyle's λ fell ~50× ($1M moved ~0.25pp by Oct) (arXiv:2603.03136). Note: raw Polymarket volume overstates real turnover ~2.5×.
@@ -44,11 +44,11 @@
 ## 5. Model-based trading
 ### Weather (Kalshi settles on NWS climate reports per station)
 - Playbook: GFS+ECMWF ensembles + climatology; 2–5 days out = widest mispricing; same-day = latency race lost to bots. Documented micro-edge: 88–95¢ NO band with ≥2°F cushion → +1.5–2.4%/trade after fees ([botforkalshi](https://www.botforkalshi.com/blog/kalshi-weather-trading-strategy)).
-- **Must-read failure: Northlake Labs went 0-for-32** assuming Gaussian errors — forecast errors are fat-tailed; "weather arb bots execute within seconds of every NWS model cycle update" ([postmortem](https://www.northlakelabs.com/max/blog/kalshi-weather-postmortem-and-pivot/)).
+- **Must-read failure: Northlake Labs went 0-for-32** assuming Gaussian errors, forecast errors are fat-tailed; "weather arb bots execute within seconds of every NWS model cycle update" ([postmortem](https://www.northlakelabs.com/max/blog/kalshi-weather-postmortem-and-pivot/)).
 - Scale: single snowstorm contract $6M+; weather ~$2M/day on Polymarket; "Hans323" made ~$1.1M on a London-weather structure. Capacity per market: thousands.
 
 ### Economic data
-- **Kalshi Fed markets now scary-accurate:** NBER WP (Jan 2026) — perfect day-before-FOMC record 2022–Jun 2025, beats Fed funds futures ([Fortune](https://www.fortune.com/2026/01/28/kalshi-prediction-market-federal-reserve-betting-forecast-nber-working-paper)). Naive Kalshi-vs-FedWatch is dead.
+- **Kalshi Fed markets now scary-accurate:** NBER WP (Jan 2026), perfect day-before-FOMC record 2022–Jun 2025, beats Fed funds futures ([Fortune](https://www.fortune.com/2026/01/28/kalshi-prediction-market-federal-reserve-betting-forecast-nber-working-paper)). Naive Kalshi-vs-FedWatch is dead.
 - Residual: earlier-cycle lag vs rate-vol markets; **CPI bracket ladders vs Cleveland Fed nowcast** (historically beats consensus); tails of CPI ladders still overpriced (Economics ψ=0.034***); release-second latency race.
 
 ### Sports
@@ -58,7 +58,7 @@
 ## 6. News/latency
 - **Crypto hourly/5-min markets:** Binance updates ~200ms; Kalshi reprices with 3–7s lag; one bot **extracted $271.5k in 30 days** from Polymarket latency before dynamic fees were added ([Turbine](https://www.turbinefi.com/blog/why-prediction-market-trades-get-picked-off-2026)).
 - **Mention markets:** pros use TV antennas for sub-second edge; live transcription + LLM extraction pipelines wired into Kalshi API. Insider tail: Trump's teleprompter operator made $100k+ (federal probe Jul–Aug 2026); whole category under CFTC review ([NPR](https://www.npr.org/2026/08/13/nx-s1-5930689/cftc-probe-mention-markets-prediction-markets-kalshi)).
-- **Oracle risk (Polymarket global):** UMA optimistic oracle — Mar 2025 Ukraine-minerals market governance-attacked 9%→100%, **$7M false payout** ([Orochi](https://orochi.network/blog/oracle-manipulation-in-polymarket-2025)); Zelensky-suit fiasco. Price markets since moved to Chainlink.
+- **Oracle risk (Polymarket global):** UMA optimistic oracle, Mar 2025 Ukraine-minerals market governance-attacked 9%→100%, **$7M false payout** ([Orochi](https://orochi.network/blog/oracle-manipulation-in-polymarket-2025)); Zelensky-suit fiasco. Price markets since moved to Chainlink.
 - Classic tales ([LessWrong](https://www.lesswrong.com/posts/yXHcqrCpiHC5tDuEc/tales-from-prediction-markets)): Mauna Loa CO₂ data trader (~$40k); the $156k fat-finger scooped by resting lowball bids (→ always rest deep bids); Soulja-Boy manipulation; flash-loan resolution-gaming attempt.
 
 ## 7. Time decay / "theta" (selling longshots near expiry)
@@ -66,7 +66,7 @@
 
 ## 8. Copy/flow analysis
 - Mature tooling: PolyTrack, Polymarket Analytics (1M+ wallets P&L), copy bots with sub-3s mirroring. **Mostly doesn't work:** you inherit losses fully, wins at a discount; whale edge is often unobservable context (hedges, MM inventory, coordinated wallets); whales know they're watched and paint the tape.
-- Realistic use: **idea/watchlist feed** — sudden smart-wallet accumulation in a sleepy market is Bayesian evidence.
+- Realistic use: **idea/watchlist feed**, sudden smart-wallet accumulation in a sleepy market is Bayesian evidence.
 
 ## 9. Combinatorial/Dutch-booking
 - Books for logically-dependent markets are isolated (no cross-margining) → implication violations persist. Full Dutch-booking is NP-hard; pairwise dies in seconds, long-tail logical inconsistencies persist. Legs resolve on **wording**, not your logic model.

@@ -15,21 +15,19 @@ Every claim is tagged:
 
 ---
 
-## 0. The constraint, stated once, and what it actually forbids
+## 0. The two questions, kept separate
 
-The owner is an international student in the United States who cannot obtain a US SSN and therefore
-cannot fund a Kalshi account. Nothing in this file proposes misrepresenting identity, residency or
-nationality, and no VPN-based access to a geoblocked venue is considered. Where a venue is closed,
-this file says so and moves on.
-
-Two distinctions matter throughout and are kept separate everywhere below:
+Two distinctions matter throughout and are kept apart everywhere below:
 
 - **READ access** -- can we pull market data, book depth, a trade tape and history? This is what the
   research engine needs. It is frequently free and frequently unauthenticated.
-- **TRADE access** -- can this person legally open and fund an account? This is what a strategy
-  needs. It is frequently gated behind a US tax identifier or a residency test.
+- **TRADE access** -- is the venue open to a given account, and on what terms? This is what a strategy
+  needs, and it is set by each venue's own onboarding and geographic rules rather than by anything in
+  this codebase.
 
-The second constraint is the binding one and it does **not** move by writing code.
+Nothing in this file proposes misrepresenting identity, residency or nationality, and no VPN-based
+access to a geoblocked venue is considered. Where a venue is closed, this file says so and moves on.
+The second constraint is the binding one, and it does **not** move by writing code.
 
 ---
 
@@ -170,13 +168,13 @@ recorder, the client and the price type are not.**
 
 ---
 
-## 2. Access: which venues can we READ, and which could this person ever TRADE?
+## 2. Access: which venues can we READ, and which are open to TRADE?
 
-Everything in this table with an HTTP status was tested live from the owner's machine this session.
+Everything in this table with an HTTP status was tested live this session, from a US residential connection.
 
-| venue | public unauth READ | historical | fee model | TRADE access for a US-resident non-SSN person |
+| venue | public unauth READ | historical | fee model | TRADE access |
 |---|---|---|---|---|
-| **Kalshi** | **[M] yes, REST only** | **[M] yes (hourly candles, full tape)** | theta 0.07 p(1-p) taker, maker 0 | **closed** -- US tax identifier required |
+| **Kalshi** | **[M] yes, REST only** | **[M] yes (hourly candles, full tape)** | theta 0.07 p(1-p) taker, maker 0 | **gated** -- US tax identifier required at onboarding |
 | **Polymarket intl** | **[M] yes, REST + WebSocket L2** | **[M] yes (prices-history, tape with wallet ids)** | theta 0.04-0.07 by category, maker 0 | **closed** -- US geoblocked |
 | **Polymarket US** | **[M] no -- HTTP 401** | n/a | theta 0.06 taker, -0.0125 maker | **closed** -- KYC gates the API itself |
 | **Manifold** | **[M] yes** | **[M] yes (bets endpoint + data dumps)** | play money, no cash conversion | **open** -- but no real money exists |
@@ -205,7 +203,7 @@ GET /trade-api/v2/portfolio/balance                     -> HTTP 401
 Verified on real books, not just empty ones: `KXFEDDECISION-28JAN-H26` returned five YES levels and
 five NO levels; `KXHIGHCHI-26AUG28-T87` returned a two-sided book. **This means every measurement in
 files 09 through 14 -- calibration, the Dutch-book scan, the ladder tests, the 429,335-trade markout
-that produced 1.94c -- can be reproduced and extended indefinitely with no account and no SSN.**
+that produced 1.94c -- can be reproduced and extended indefinitely with no account at all.**
 
 **[M] Note also that the docstring on `venues/kalshi/client.py:346` is stale.** It says the orderbook
 endpoint *"Requires auth."* It does not. Not fixing it here, per the terms of this task, but it is
@@ -247,7 +245,7 @@ Kalshi's tape is anonymous. **[I] This is a materially richer research substrate
 identification, per-wallet markouts and flow-toxicity clustering are all possible on Polymarket and
 are not possible on Kalshi.**
 
-**[M] And trading is closed.** `GET https://polymarket.com/api/geoblock` from the owner's machine
+**[M] And trading is geoblocked.** `GET https://polymarket.com/api/geoblock` from a US connection
 returns `{"blocked":true,"ip":"...","country":"US","region":"GA"}`. **[C]** The United States is on
 the close-only list on both the frontend and the API
 ([docs.polymarket.com/api-reference/geoblock](https://docs.polymarket.com/api-reference/geoblock)),
@@ -262,14 +260,12 @@ issued only from the developer portal after in-app approval
 ([docs.polymarket.us/getting-started/quickstart](https://docs.polymarket.us/getting-started/quickstart)).
 **[C]** KYC is mandatory before deposit or trade and follows US federal identity/AML standards
 ([docs.polymarket.us/learn/get-started/signup](https://docs.polymarket.us/learn/get-started/signup)).
-Secondary sources state SSN specifically
-([copytradeinsider](https://www.copytradeinsider.com/blog/polymarket-kyc-requirements/)).
 
-**[I] Polymarket US is worse than Kalshi for this owner, not better**: Kalshi at least gives free
+**[I] Polymarket US is worse than Kalshi for this project, not better**: Kalshi at least gives free
 read access, and Polymarket US gives none. File 11 already established it is also the smaller book
 ($1.3B/month vs $9B international vs $9.8B Kalshi).
 
-### 2.4 ForecastEx / IBKR -- the one venue whose access question is genuinely open
+### 2.4 ForecastEx / IBKR -- the one venue whose access terms are genuinely open
 
 **[C]** ForecastEx is a CFTC-regulated DCM and DCO operated by Interactive Brokers, trading through
 the standard TWS/Web API with security type `OPT` and exchange `FORECASTX`
@@ -282,21 +278,10 @@ to eligible clients of IBKR LLC, IBKR Canada, IBKR Hong Kong, IBKR Ireland and I
 availability varying by the client's country of residence
 ([IBKR Prediction Markets](https://www.interactivebrokers.com/predictionmarkets/en/home.php)).
 
-**[I] IBKR onboards non-US persons routinely and does not universally require an SSN -- a non-US
-person normally onboards on a W-8BEN with a foreign tax identifier.** Whether a US-resident F-1
-student specifically qualifies, and under which IBKR entity, is a question for IBKR, not for me, and
-this is not financial or immigration advice. **It is the single cheapest thing on this entire list to
-check, and it is the only realistic path to any funded venue that surfaced in this research.** One
-support enquiry.
-
-**[C] A parallel and equally cheap check: whether Kalshi accepts an ITIN in place of an SSN.**
-Secondary sources say yes -- *"an equivalent US tax ID (ITIN) is acceptable"*
-([predictionmarkets101](https://predictionmarkets101.com/how-to-sign-up-for-kalshi)). **[M] Kalshi's
-own help page does not enumerate the acceptable taxpayer identifiers at all**
-([help.kalshi.com signing up as an individual](https://help.kalshi.com/account/signing-up/signing-up-as-an-individual),
-fetched this session), so this is unconfirmed and must not be planned around. An ITIN is the
-legitimate identifier for a person who is ineligible for an SSN, so asking Kalshi support directly
-involves no misrepresentation of anything. If the answer is yes, this entire file is moot.
+**[I] IBKR's onboarding is the broadest on this list**, spanning several national entities with
+availability set by the client's country of residence, so ForecastEx is the one venue here whose access
+terms are a published matrix rather than a single national gate. What that matrix permits in a given case
+is a question for IBKR, and confirming it is one support enquiry rather than weeks of engineering.
 
 ### 2.5 The remainder, briefly
 
@@ -449,10 +434,10 @@ of +0.21 to +0.74 computed one-observation-per-market on 4,258 settled markets.
 
 **The honest assessment, which is more mixed than the framing suggests.**
 
-- **What Manifold IS good for:** it is the only venue on this list where this owner can place actual
-  orders, with zero capital, zero KYC and zero legal risk. If the open question is *"can this person
-  forecast?"* -- distinct from *"can this engine trade?"* -- then a public, timestamped, adversarial
-  track record has real value, and it is free. The parts of our stack that would exercise are the
+- **What Manifold IS good for:** it is the only venue on this list where orders can actually be placed,
+  with no account verification, no capital and no legal exposure. If the open question is *"is the forecast
+  any good?"*, distinct from *"can this engine trade?"*, then a public, timestamped, adversarial track
+  record has real value, and it is free. The parts of our stack that would exercise are the
   `Decision` record, the calibration and skill-score machinery in `core/math/stats.py`, and the
   un-acted-decision logging that makes calibration measurable without survivorship bias.
 - **What Manifold is NOT good for, and this is the part usually skipped:** a play-money population is
@@ -499,28 +484,27 @@ point it.**
 | `risk/engine.py` | 2 lines (the hardcoded `"kalshi"` venue-exposure key and the `venue: str = "kalshi"` default) |
 
 **[I] Project B's cost is dominated by the price convention, and its benefit is zero, because every
-venue whose execution engine is worth writing is closed to this person.** Do not start it.
+venue whose execution engine would be worth writing is either gated at onboarding or, as section 3 measured,
+tighter than the venue this engine already speaks.** Do not start it.
 
 ---
 
 ## 5. The honest recommendation
 
 **The finding that should drive the decision is not about another venue. It is that Kalshi's read API
-never needed an account.** The premise "we cannot fund Kalshi, therefore we should look elsewhere"
+never needed an account.** The premise "trading access is gated, therefore we should look elsewhere"
 conflates trading access with research access. **[M] Every result this project has produced -- the
 18-cell calibration test, the 131,872-observation arbitrage scan, the 429,335-trade markout -- was
 computed from endpoints that return HTTP 200 to an anonymous request.**
 
 Ranked by expected value net of effort:
 
-**1. Confirm whether a funded account is actually impossible. [effort: two emails; EV: highest on the
-list, by a wide margin.]** Ask Kalshi support whether an ITIN satisfies their taxpayer-identification
-requirement -- secondary sources say it does, Kalshi's own help page does not say, and there is
-nothing to misrepresent in asking. Ask IBKR which entity a US-resident non-US-person onboards under
-for ForecastEx event contracts. **[I] If either answer is yes, the entire portability question
-dissolves and the correct move is to stay on a venue this engine already speaks natively.** Two
-enquiries dominate weeks of porting work on expected value and should be done before anything else in
-this file.
+**1. Settle the access question with the venues themselves before writing a line of porting code.
+[effort: two emails; EV: highest on the list, by a wide margin.]** Kalshi and IBKR each publish part of
+their onboarding requirements and leave the rest to support, so the terms that actually apply are one
+enquiry away from each. **[I] If either venue is open, the portability question dissolves and the correct
+move is to stay on a venue this engine already speaks natively.** Two enquiries dominate weeks of porting
+work on expected value and should be done before anything else in this file.
 
 **2. Keep the Kalshi recorder running and widen the window. [effort: ~0; EV: moderate, as option
 value.]** **[M]** The corpus is now 3,514,353 snapshots over 26.3 hours, 2,773,285 trades over 16.0
@@ -593,8 +577,6 @@ confirmation costs days, needs no account anywhere, and is worth more than any o
 **Secondary**
 - [Yogonet -- PredictIt/Aristotle CFTC approval, Sept 2025](https://www.yogonet.com/international/news/2025/09/09/115247-predictit-gains-regulatory-approval-to-operate-as-a-licensed-derivatives-exchange)
 - [marketmath.io -- ForecastEx fees](https://marketmath.io/platforms/forecastex) | [pm.wiki -- ForecastEx](https://pm.wiki/learn/forecastex-prediction-market)
-- [predictionmarkets101 -- Kalshi signup, ITIN claim (UNCONFIRMED against Kalshi's own docs)](https://predictionmarkets101.com/how-to-sign-up-for-kalshi)
-- [copytradeinsider -- Polymarket US KYC/SSN](https://www.copytradeinsider.com/blog/polymarket-kyc-requirements/)
 - [Datawallet -- Hyperliquid restricted countries](https://www.datawallet.com/crypto/hyperliquid-supported-and-restricted-countries) | [Deribit restricted jurisdictions](https://support.deribit.com/hc/en-us/articles/25944487427741-Restricted-Jurisdictions)
 - [gambling911 -- Manifold eliminates sweepstakes](https://www.gambling911.com/gambling/manifold-eliminates%20sweepstakes-model)
 

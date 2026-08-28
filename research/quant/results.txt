@@ -1,5 +1,5 @@
 ==============================================================================
-A. FEE ALGEBRA — break-even edge (cents) by price, hold-to-settlement (1 fee)
+A. FEE ALGEBRA, break-even edge (cents) by price, hold-to-settlement (1 fee)
 ==============================================================================
  price |  K taker  K maker | PM taker  PM maker
     5c |   0.333c   0.083c |   0.285c   -0.059c
@@ -21,7 +21,7 @@ Fee as % of capital at risk (taker, buy YES at c): fee/c:
   at 90c:  0.70% of stake (Kalshi taker)
 
 ==============================================================================
-B. KELLY — f* = (p-c)/(1-c); growth g(f)=p ln(1+f(1-c)/c)+(1-p) ln(1-f)
+B. KELLY, f* = (p-c)/(1-c); growth g(f)=p ln(1+f(1-c)/c)+(1-p) ln(1-f)
 ==============================================================================
 Reference bet: price 50c, true prob 55% (5c edge). f* = 10.0% of bankroll
   0.10x Kelly: stake  1.0%  growth    +9.5 bp/bet  (  +60.8% over 500 bets)
@@ -39,7 +39,7 @@ Mis-estimation: you SIZE for a 5c edge, TRUE edge is 2.5c (p=52.5%):
   [comparison: half-Kelly sized on the TRUE edge:   +9.4 bp/bet]
 
 ==============================================================================
-C. DRAWDOWN — analytic P(ever hit x of start) = x^(2/m - 1) vs Monte Carlo
+C. DRAWDOWN, analytic P(ever hit x of start) = x^(2/m - 1) vs Monte Carlo
    (2,000-bet horizon, price 50c, true p 55%, 20,000 paths)
 ==============================================================================
   1.00x Kelly: P(halve) MC  47.0% (analytic  50.0%) | P(-90%) MC  9.22% (an 10.00%) | med MaxDD 93.9% | terminal p5 16.32x med 22398.15x
@@ -47,7 +47,7 @@ C. DRAWDOWN — analytic P(ever hit x of start) = x^(2/m - 1) vs Monte Carlo
   0.25x Kelly: P(halve) MC   0.7% (analytic   0.8%) | P(-90%) MC  0.00% (an  0.00%) | med MaxDD 41.0% | terminal p5 12.50x med 79.51x
 
 ==============================================================================
-D. SAMPLE SIZE — one-sided binomial test H0: win rate=c, alpha=5%
+D. SAMPLE SIZE, one-sided binomial test H0: win rate=c, alpha=5%
    n = [(z_a*sqrt(c(1-c)) + z_b*sqrt(p(1-p))) / edge]^2
 ==============================================================================
  price   edge |  n (80% power)  n (95% power)
@@ -63,10 +63,10 @@ D. SAMPLE SIZE — one-sided binomial test H0: win rate=c, alpha=5%
 
 --- D2. PEEKING: null strategy (edge=0 at 50c), naive check every 50 trades
   P(naive sequential test declares a (nonexistent) edge within 2,000 trades): 25.4%
-  (single fixed-n test at 2,000: 5.0% — the promised 5%)
+  (single fixed-n test at 2,000: 5.0%, the promised 5%)
 
 ==============================================================================
-E. SHRINKAGE / WINNER'S CURSE — Bayesian factor sigma_e^2/(sigma_e^2+sigma_n^2)
+E. SHRINKAGE / WINNER'S CURSE, Bayesian factor sigma_e^2/(sigma_e^2+sigma_n^2)
 ==============================================================================
   sigma_edge=3c, sigma_noise=3c, trade if est>2c: selected 31.9% of opps | mean est 4.75c -> mean TRUE 2.38c  (realized =  50% of estimated)
   sigma_edge=3c, sigma_noise=3c, trade if est>5c: selected 11.9% of opps | mean est 7.08c -> mean TRUE 3.54c  (realized =  50% of estimated)
@@ -79,14 +79,14 @@ E. SHRINKAGE / WINNER'S CURSE — Bayesian factor sigma_e^2/(sigma_e^2+sigma_n^2
     [analytic shrinkage factor: 20%]
 
 ==============================================================================
-F. CORRELATED PORTFOLIO — effective independent bets N_eff = N/(1+(N-1)rho)
+F. CORRELATED PORTFOLIO, effective independent bets N_eff = N/(1+(N-1)rho)
 ==============================================================================
   N= 20: rho=0.00-> 20.0  rho=0.05-> 10.3  rho=0.10->  6.9  rho=0.20->  4.2  rho=0.30->  3.0  rho=0.50->  1.9  
   N= 50: rho=0.00-> 50.0  rho=0.05-> 14.5  rho=0.10->  8.5  rho=0.20->  4.6  rho=0.30->  3.2  rho=0.50->  2.0  
   N=100: rho=0.00->100.0  rho=0.05-> 16.8  rho=0.10->  9.2  rho=0.20->  4.8  rho=0.30->  3.3  rho=0.50->  2.0  
 
 ==============================================================================
-G. FLAGSHIP SIM — maker favorite-side basket
+G. FLAGSHIP SIM, maker favorite-side basket
    buy at 85c, true p=88% (3c gross), maker fee 0.22c -> net edge 2.78c
    10 concurrent positions (2 clusters of 5, rho=0.20 in-cluster), 2% stake each
    50 rounds x 10 = 500 settlements per path, 20,000 paths
@@ -101,7 +101,7 @@ G. FLAGSHIP SIM — maker favorite-side basket
   rho=0.4: median 1.365x | p5 0.918x | P(loss) 9.9% | p95 MaxDD 29.3%
 
 ==============================================================================
-H. CROSS-VENUE ARB — buy YES@a (Kalshi taker) + buy NO@b (PM-US taker)
+H. CROSS-VENUE ARB, buy YES@a (Kalshi taker) + buy NO@b (PM-US taker)
    locked profit per $1 = 1 - a - b - feeK(a) - feePM(1-b ... use b price)
 ==============================================================================
  YES a   NO b  gross gap    fees     net
@@ -115,7 +115,7 @@ Same trade with Kalshi MAKER leg (rest, get filled) at 48/48:
   fees 1.93c -> net at 4c gross gap: +2.07c
 
 ==============================================================================
-I. ADVERSE SELECTION (Glosten-Milgrom sketch) — break-even half-spread
+I. ADVERSE SELECTION (Glosten-Milgrom sketch), break-even half-spread
    s/2 >= mu/(1-mu) * L   (mu = informed share of your fills, L = loss to informed)
 ==============================================================================
   mu=  2%, L= 5c -> required half-spread  0.10c     mu=  2%, L=10c -> required half-spread  0.20c   
@@ -145,7 +145,7 @@ B_y_grid: {0.5: '215.0', 1.0: '150.0', 1.5: '85.0', 2.0: '20.0'}
 C_x_ticks: {0: '60.0', 10: '188.0', 20: '316.0', 30: '444.0', 40: '572.0', 50: '700.0'}
 
 ==============================================================================
-K. HEDGING MATH — minimum-variance hedge with a correlated market
+K. HEDGING MATH, minimum-variance hedge with a correlated market
    h* = rho * sigma_A/sigma_B ; residual variance fraction = 1 - rho^2
 ==============================================================================
 Position: $100 at risk in market A (p=0.5, sigma=0.50/contract-$)
@@ -158,7 +158,7 @@ NOTE: hedging costs the hedge leg's fee + spread + its own edge give-up;
 hedge only when residual-variance reduction is worth ~1-2c per hedged dollar.
 
 ==============================================================================
-L. N-OUTCOME DUTCH BOOK — fee hurdle to buy ALL outcomes (taker), equal prices
+L. N-OUTCOME DUTCH BOOK, fee hurdle to buy ALL outcomes (taker), equal prices
    need sum(prices) < 1 - sum(fees). Table: max sum(YES) that still profits
 ==============================================================================
 N outcomes |  Kalshi taker  PM-US taker |  Kalshi maker

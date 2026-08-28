@@ -14,7 +14,7 @@ def pmus_taker_fee(c):     return 0.06 * c * (1 - c)
 def pmus_maker_rebate(c):  return -0.0125 * c * (1 - c)
 
 print("=" * 78)
-print("A. FEE ALGEBRA — break-even edge (cents) by price, hold-to-settlement (1 fee)")
+print("A. FEE ALGEBRA: break-even edge (cents) by price, hold-to-settlement (1 fee)")
 print("=" * 78)
 print(f"{'price':>6} | {'K taker':>8} {'K maker':>8} | {'PM taker':>8} {'PM maker':>9}")
 for c in [0.05, 0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 0.95]:
@@ -27,7 +27,7 @@ for c in [0.05, 0.10, 0.50, 0.90]:
 
 print()
 print("=" * 78)
-print("B. KELLY — f* = (p-c)/(1-c); growth g(f)=p ln(1+f(1-c)/c)+(1-p) ln(1-f)")
+print("B. KELLY: f* = (p-c)/(1-c); growth g(f)=p ln(1+f(1-c)/c)+(1-p) ln(1-f)")
 print("=" * 78)
 def growth(f, c, p):
     if f <= 0: return 0.0
@@ -54,7 +54,7 @@ print(f"  [comparison: half-Kelly sized on the TRUE edge: {g_half_true*1e4:+6.1f
 
 print()
 print("=" * 78)
-print("C. DRAWDOWN — analytic P(ever hit x of start) = x^(2/m - 1) vs Monte Carlo")
+print("C. DRAWDOWN: analytic P(ever hit x of start) = x^(2/m - 1) vs Monte Carlo")
 print("   (2,000-bet horizon, price 50c, true p 55%, 20,000 paths)")
 print("=" * 78)
 n_paths, n_bets = 20000, 2000
@@ -77,7 +77,7 @@ for m in [1.0, 0.5, 0.25]:
 
 print()
 print("=" * 78)
-print("D. SAMPLE SIZE — one-sided binomial test H0: win rate=c, alpha=5%")
+print("D. SAMPLE SIZE: one-sided binomial test H0: win rate=c, alpha=5%")
 print("   n = [(z_a*sqrt(c(1-c)) + z_b*sqrt(p(1-p))) / edge]^2")
 print("=" * 78)
 za = z(0.95)
@@ -100,11 +100,11 @@ for k in range(50, n_bets2 + 1, 50):
     zstat = (phat - 0.5) / sqrt(0.25 / k)
     false_pos |= (zstat > za)
 print(f"  P(naive sequential test declares a (nonexistent) edge within 2,000 trades): {false_pos.mean():.1%}")
-print(f"  (single fixed-n test at 2,000: {( (cum[:,-1]/2000 - 0.5)/sqrt(0.25/2000) > za ).mean():.1%} — the promised 5%)")
+print(f"  (single fixed-n test at 2,000: {( (cum[:,-1]/2000 - 0.5)/sqrt(0.25/2000) > za ).mean():.1%}: the promised 5%)")
 
 print()
 print("=" * 78)
-print("E. SHRINKAGE / WINNER'S CURSE — Bayesian factor sigma_e^2/(sigma_e^2+sigma_n^2)")
+print("E. SHRINKAGE / WINNER'S CURSE: Bayesian factor sigma_e^2/(sigma_e^2+sigma_n^2)")
 print("=" * 78)
 # true edges across opportunities ~ N(0, se); your estimate = true + N(0, sn); trade if est > threshold
 for se, sn in [(0.03, 0.03), (0.03, 0.02), (0.02, 0.04)]:
@@ -122,7 +122,7 @@ for se, sn in [(0.03, 0.03), (0.03, 0.02), (0.02, 0.04)]:
 
 print()
 print("=" * 78)
-print("F. CORRELATED PORTFOLIO — effective independent bets N_eff = N/(1+(N-1)rho)")
+print("F. CORRELATED PORTFOLIO: effective independent bets N_eff = N/(1+(N-1)rho)")
 print("=" * 78)
 for N in [20, 50, 100]:
     row = "  N=%3d: " % N
@@ -132,7 +132,7 @@ for N in [20, 50, 100]:
 
 print()
 print("=" * 78)
-print("G. FLAGSHIP SIM — maker favorite-side basket")
+print("G. FLAGSHIP SIM: maker favorite-side basket")
 print("   buy at 85c, true p=88% (3c gross), maker fee 0.22c -> net edge 2.78c")
 print("   10 concurrent positions (2 clusters of 5, rho=0.20 in-cluster), 2% stake each")
 print("   50 rounds x 10 = 500 settlements per path, 20,000 paths")
@@ -195,7 +195,7 @@ for rho_ in [0.0, 0.4]:
 
 print()
 print("=" * 78)
-print("H. CROSS-VENUE ARB — buy YES@a (Kalshi taker) + buy NO@b (PM-US taker)")
+print("H. CROSS-VENUE ARB: buy YES@a (Kalshi taker) + buy NO@b (PM-US taker)")
 print("   locked profit per $1 = 1 - a - b - feeK(a) - feePM(1-b ... use b price)")
 print("=" * 78)
 print(f"{'YES a':>6} {'NO b':>6} {'gross gap':>10} {'fees':>7} {'net':>7}")
@@ -210,7 +210,7 @@ print(f"  fees {fees_m*100:.2f}c -> net at 4c gross gap: {(0.04-fees_m)*100:+.2f
 
 print()
 print("=" * 78)
-print("I. ADVERSE SELECTION (Glosten-Milgrom sketch) — break-even half-spread")
+print("I. ADVERSE SELECTION (Glosten-Milgrom sketch): break-even half-spread")
 print("   s/2 >= mu/(1-mu) * L   (mu = informed share of your fills, L = loss to informed)")
 print("=" * 78)
 for mu in [0.02, 0.05, 0.10, 0.20]:

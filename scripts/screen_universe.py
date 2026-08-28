@@ -71,7 +71,7 @@ def main() -> int:
         events, by_event = load_latest(db)
 
     print("=" * 78)
-    print("MECE GATE — screening the recorded universe")
+    print("MECE GATE: screening the recorded universe")
     print("=" * 78)
     print(f"  events: {len(events):,}   markets: {sum(len(v) for v in by_event.values()):,}")
 

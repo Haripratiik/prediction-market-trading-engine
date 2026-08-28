@@ -1,5 +1,5 @@
 ================================================================================
-S2-SHORT — SELLING MUTUALLY-EXCLUSIVE BASKETS (the structurally safe direction)
+S2-SHORT, SELLING MUTUALLY-EXCLUSIVE BASKETS (the structurally safe direction)
 ================================================================================
   MECE events with 2-90 live legs: 6,020
   collateral_return_type values  : {'MECNET': 6020}

@@ -1,4 +1,4 @@
-# Live Kalshi Universe Reconnaissance — Measured Findings
+# Live Kalshi Universe Reconnaissance: Measured Findings
 
 **Harvested 2026-08-26 04:33 UTC** from the public (unauthenticated) Kalshi API,
 `https://api.elections.kalshi.com/trade-api/v2`. Complete open-event universe, not a sample.
@@ -17,13 +17,13 @@ Raw output: [`recon_report.txt`](recon/recon_report.txt) · [`dutchbook_report.t
 
 | # | Finding | Consequence |
 |---|---|---|
-| **F1** | **`mutually_exclusive` does NOT mean exhaustive.** 33 events price at `sum(YES ask) < 0.90` — not arbitrage, but races whose listed outcomes don't cover the outcome space (no "other" leg). | A naive Dutch-book bot would treat these as the *most* profitable trades and lose ~100% on each. This is correction C4 measured. **Hard exhaustiveness gate required.** |
+| **F1** | **`mutually_exclusive` does NOT mean exhaustive.** 33 events price at `sum(YES ask) < 0.90`, not arbitrage, but races whose listed outcomes don't cover the outcome space (no "other" leg). | A naive Dutch-book bot would treat these as the *most* profitable trades and lose ~100% on each. This is correction C4 measured. **Hard exhaustiveness gate required.** |
 | **F2** | The `/markets` endpoint is ~99% multivariate parlay shards. The real universe is only reachable via `/events?with_nested_markets=true`. | Recorder must page `/events`, not `/markets`. |
 | **F3** | Kalshi publishes `mutually_exclusive`, `settlement_sources`, and `collateral_return_type` **per event**. | S2's MECE candidate detection is a field read, not an inference. Rulebook engine gets structured input free. |
-| **F4** | Every MECE event carries `collateral_return_type = MECNET`. | Strongly implies collateral netting across legs — would materially improve S2 capital efficiency. **Must be verified against authenticated margin endpoints before sizing.** |
+| **F4** | Every MECE event carries `collateral_return_type = MECNET`. | Strongly implies collateral netting across legs, would materially improve S2 capital efficiency. **Must be verified against authenticated margin endpoints before sizing.** |
 | **F5** | 84.8% of markets have **zero** 24h volume; the top 200 markets are 62.7% of all volume. | Capacity concentration is worse than assumed. Liquidity filters are not optional. |
-| **F6** | Fee hurdles measured: an n=2 Dutch book needs `sum(px) < 0.9650` as taker but `< 0.9913` as maker. | Correction C2 confirmed — the maker window is ~2.6 points wider, in the price region where density is highest. |
-| **F7** | Genuine (n≥3) liquidity-filtered maker structures: **147**, ~$15.7k deployable, ~$282 one-shot if all complete. | S2 is real but small — confirming correction C5 (RV alone cannot fill the book). |
+| **F6** | Fee hurdles measured: an n=2 Dutch book needs `sum(px) < 0.9650` as taker but `< 0.9913` as maker. | Correction C2 confirmed, the maker window is ~2.6 points wider, in the price region where density is highest. |
+| **F7** | Genuine (n≥3) liquidity-filtered maker structures: **147**, ~$15.7k deployable, ~$282 one-shot if all complete. | S2 is real but small, confirming correction C5 (RV alone cannot fill the book). |
 | **F8** | 100% of markets expose `rules_primary` (median 142 chars); 100% of events expose `settlement_sources`. | The rulebook engine is buildable immediately, at full universe coverage. |
 
 ---
@@ -91,12 +91,12 @@ top 1000 markets = 84.2%
 ```
 
 **Time to close:** p50 = 1,608 hours (~67 days). 47.4% of markets close more than 3 months out; only 7.3%
-within 24 hours. Capital lockup is a first-order cost — annualized return on locked capital must be computed
+within 24 hours. Capital lockup is a first-order cost, annualized return on locked capital must be computed
 per structure (PLAN.md §9 `min_annualized_return_on_locked_capital`).
 
 ---
 
-## 3. S1 — structural maker basket: universe is larger than assumed
+## 3. S1: structural maker basket: universe is larger than assumed
 
 | Filter | Markets |
 |---|---:|
@@ -105,7 +105,7 @@ per structure (PLAN.md §9 `min_annualized_return_on_locked_capital`).
 | **+ nonzero 24h volume → S1 universe** | **547** |
 
 - **Deployable at 20% of touch depth: ~$198,800.** Comfortably above the plan's working-capital scale, so
-  S1 is *not* capacity-constrained at a five-figure bankroll — depth, not opportunity count, was the worry
+  S1 is *not* capacity-constrained at a five-figure bankroll, depth, not opportunity count, was the worry
   and it is unfounded at this size.
 - Their spreads are tight: median 2c (p25 = 1c, p95 = 12c).
 - Their 24h volume: median 203 contracts (p75 = 797, p95 = 9,241).
@@ -115,11 +115,11 @@ per structure (PLAN.md §9 `min_annualized_return_on_locked_capital`).
 **Implication for PLAN.md §3.1:** S1's universe is dominated by sports, not by the single-name/politics
 categories where the documented favorite-longshot bias is largest. The `THETA_BY_HORIZON` recalibration and
 the single-name adjustment must therefore be **fitted per category**, and the sleeve should report edge
-separately for sports vs non-sports — they are effectively two different strategies wearing one name.
+separately for sports vs non-sports, they are effectively two different strategies wearing one name.
 
 ---
 
-## 4. S2 — Dutch books: real, small, and booby-trapped
+## 4. S2: Dutch books: real, small, and booby-trapped
 
 ### 4.1 The universe
 
@@ -130,7 +130,7 @@ leg counts: n=2 2,666 | n=3 1,876 | n=4 135 | n=5 99 | n=6 222 | n≥7 ~830
 by category: Sports 4,623 | Elections 913 | Entertainment 225 | Weather 94 | Economics 82
 ```
 
-**Overround** — `sum(YES ask)` across MECE events:
+**Overround**: `sum(YES ask)` across MECE events:
 
 | p5 | p25 | p50 | p75 | p95 |
 |---:|---:|---:|---:|---:|
@@ -138,7 +138,7 @@ by category: Sports 4,623 | Elections 913 | Entertainment 225 | Weather 94 | Eco
 
 The median book is 14% overround. Buying every outcome at the ask is normally a large guaranteed loss.
 
-### 4.2 F1 — the exhaustiveness trap (the most important finding)
+### 4.2 F1: the exhaustiveness trap (the most important finding)
 
 `mutually_exclusive = true` guarantees **at most one** outcome resolves YES. It does **not** guarantee that
 **at least one** does. 33 flagged-MECE events price below 0.90, and in every inspected case the reason is a
@@ -154,7 +154,7 @@ non-exhaustive outcome list, not mispricing:
 | 0.310 | 6 | `KXACQUANNOUNCEPINS-27JAN01` | Who will acquire Pinterest this year? |
 | 0.320 | 32 | `KXNEXTTEAMNFL-26BSOR` | Brendan Sorsby's Next Team |
 
-Quoted legs equal total markets in the event for 99.3% of flagged-MECE events — so this is **not** a data
+Quoted legs equal total markets in the event for 99.3% of flagged-MECE events, so this is **not** a data
 gap in the harvest. The events genuinely list only some candidates, with no "Other/None" leg.
 
 **A naive scanner ranks these as its best opportunities** (up to +87c "net margin"). Buying all legs of
@@ -175,14 +175,14 @@ Filter: 24h volume > 0, min leg size ≥ 20 contracts, every leg spread ≤ 10c,
 | positive **after** fees | 47 (0.8%) | 3,793 (83.0%) |
 | **+ liquidity filter** | **11 (0.2%)** | **504 (11.0%)** |
 
-Of the 47 fee-profitable taker structures, **33 are the F1 exhaustiveness trap** — leaving roughly a dozen
+Of the 47 fee-profitable taker structures, **33 are the F1 exhaustiveness trap**, leaving roughly a dozen
 plausible ones, of which the credible tight-book examples are modest: `KXFEDDECISION-27MAR` (n=5, sum
 0.940, **+2.64c**, 184 contracts, 1c spreads) and `KXDCCCCHAIR-27MAR02` (n=9, sum 0.902, **+4.20c**, 1,131
 contracts, 1c spreads, 11,984 24h volume).
 
 ### 4.4 Separating arbitrage from market making
 
-For **n = 2**, a "maker Dutch book" is just resting a bid on both sides inside the spread — that is
+For **n = 2**, a "maker Dutch book" is just resting a bid on both sides inside the spread, that is
 two-sided market making (sleeve S6), and its margin is realized only if **both** legs fill. It is not
 locked arbitrage and must not be accounted as such.
 
@@ -201,9 +201,9 @@ liquidity-filtered maker-profitable structures : 504
 every structure completes.** Composition: Sports 132, Elections 6, Politics 3, Financials 3, Weather 2.
 
 This is the honest size of the Dutch-book sleeve: real, repeatable as books churn, and far too small to be
-the whole book — exactly as correction C5 predicted.
+the whole book, exactly as correction C5 predicted.
 
-### 4.5 F6 — fee hurdles, measured
+### 4.5 F6: fee hurdles, measured
 
 | n legs | taker fee hurdle | maker fee hurdle | max `sum(px)` to profit: taker | maker |
 |---:|---:|---:|---:|---:|
@@ -218,7 +218,7 @@ is the difference between "almost never" and "regularly". **Correction C2 is con
 
 ---
 
-## 5. S3 — linked relative value: structure is abundant
+## 5. S3: linked relative value: structure is abundant
 
 ```
 multi-leg events NOT flagged mutually_exclusive : 5,103   <- L2/L3/L4 link candidates
@@ -228,12 +228,12 @@ events with >= 3 legs (threshold ladders)       : 8,156
 Non-MECE multi-leg events by category: Sports 2,134 · Elections 1,162 · Financials 566 · Entertainment 328
 · Economics 295 · Politics 255.
 
-Top ladder series — these are the **L2 implication** and **L3 partition** hunting grounds:
+Top ladder series, these are the **L2 implication** and **L3 partition** hunting grounds:
 `KXMIDTERMVOTETURN` (502), `KXMIDTERMMOV` (475), `KXNCAAF1H` (206), `KXMLBINNINGWIN` (136),
 `KXNCAAFTOTAL` (78), `KXNCAAFSPREAD` (78), `KXNCAAFWINS` (73), `KXARTISTSTREAMSY` (61), `KXVOTEPRIMARY` (41).
 
 Threshold-ladder series (`...TOTAL`, `...SPREAD`, `...MOV`, `...VOTETURN`) are structurally guaranteed to
-contain monotone constraints — `P(total > 45) ≤ P(total > 40)` — which is the cleanest possible L2 link and
+contain monotone constraints, `P(total > 45) ≤ P(total > 40)`, which is the cleanest possible L2 link and
 requires no forecasting at all. **This is the highest-value target for the first S3 implementation.**
 
 ---
@@ -271,17 +271,17 @@ links (e.g. an ESPN-settled market against a Fox-Sports-settled market on the sa
 
 ## 7. Changes forced into PLAN.md
 
-1. **§3.2 `check_mece()`** — add an explicit exhaustiveness gate; the exchange's `mutually_exclusive` flag
+1. **§3.2 `check_mece()`**: add an explicit exhaustiveness gate; the exchange's `mutually_exclusive` flag
    is necessary but **not sufficient** (F1).
-2. **§3.2** — account n=2 maker structures as S6 market making with both-fill risk, not as S2 arbitrage.
-3. **§3.1** — fit `THETA_BY_HORIZON` and the single-name adjustment **per category**; report sports and
+2. **§3.2**: account n=2 maker structures as S6 market making with both-fill risk, not as S2 arbitrage.
+3. **§3.1**: fit `THETA_BY_HORIZON` and the single-name adjustment **per category**; report sports and
    non-sports edge separately.
-4. **§6.1 recorder** — page `/events?with_nested_markets=true`, not `/markets` (F2).
-5. **§5 schema** — persist `mutually_exclusive`, `collateral_return_type`, and `settlement_sources` on
+4. **§6.1 recorder**: page `/events?with_nested_markets=true`, not `/markets` (F2).
+5. **§5 schema**: persist `mutually_exclusive`, `collateral_return_type`, and `settlement_sources` on
    `market_snapshots` / a new `event_snapshots` table.
-6. **§14** — add a task to verify MECNET collateral netting against authenticated endpoints before S2 sizing
+6. **§14**: add a task to verify MECNET collateral netting against authenticated endpoints before S2 sizing
    (F4); it changes return-on-locked-capital materially.
-7. **§3.3** — prioritize threshold-ladder series (`...TOTAL`, `...SPREAD`, `...MOV`, `...VOTETURN`) as the
+7. **§3.3**: prioritize threshold-ladder series (`...TOTAL`, `...SPREAD`, `...MOV`, `...VOTETURN`) as the
    first L2 implementation target.
 
 ---
@@ -295,4 +295,4 @@ python research/recon/dutchbook_scan.py     # S2 feasibility, honest maker model
 ```
 
 No authentication required. Rerunning on a different date is the intended way to check whether these
-opportunity counts are stable or were a snapshot artifact — **do this before committing to S2 sizing.**
+opportunity counts are stable or were a snapshot artifact, **do this before committing to S2 sizing.**

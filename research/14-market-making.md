@@ -555,7 +555,7 @@ Ranked by probability x severity, most dangerous first.
 5. **The LIP is not targetable from public data** -- no API surface for reward schedules, Target Size
    or Discount Factor (1.7). You cannot even build the strategy without a funded account.
 6. **Account access and eligibility.** LIP and VIP both exclude non-US users, IB/FCM customers and MM
-   Agreement holders; rewards above IRS thresholds require an SSN on file, and are ordinary income.
+   Agreement holders; rewards above the venue's reporting threshold require a taxpayer identifier on file, and are ordinary income.
 7. **The 15-second public data grid.** **[M] Least dangerous of the listed risks, on this evidence.**
    Across the deep-polled set the median market changes its touch **0.3 times per hour** (about once
    every 3 hours), p90 is 7.3/h and p99 is 31.4/h. **Zero tickers averaged faster than the 15s grid.**

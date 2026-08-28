@@ -89,7 +89,7 @@ Q3. SPREADS, DEPTH, VOLUME
   top 1000 markets =  84.2% of 24h volume
 
 ==============================================================================
-Q2. S1 STRUCTURAL SLEEVE — tradeable favorite band
+Q2. S1 STRUCTURAL SLEEVE, tradeable favorite band
 ==============================================================================
   mid in [0.70,0.95]                 : 9,944    9.6%
   + horizon 1h-90d, depth>=$200      : 1,497
@@ -116,7 +116,7 @@ Q2. S1 STRUCTURAL SLEEVE — tradeable favorite band
   by category: {'Sports': 401, 'Commodities': 46, 'Crypto': 30, 'Financials': 22, 'Economics': 19, 'Entertainment': 12, 'Science and Technology': 9, 'Politics': 5}
 
 ==============================================================================
-Q4. S2 DUTCH BOOK — exchange-declared mutually-exclusive events
+Q4. S2 DUTCH BOOK, exchange-declared mutually-exclusive events
 ==============================================================================
   events flagged mutually_exclusive   : 6,088   48.5%
   ... with >=2 live legs              : 6,069
@@ -170,7 +170,7 @@ Q4. S2 DUTCH BOOK — exchange-declared mutually-exclusive events
   MAKER-profitable AND traded in 24h AND depth>=20: 671   <-- realistic S2 pipeline
 
 ==============================================================================
-Q5. S3 LINKED RV — structure available
+Q5. S3 LINKED RV, structure available
 ==============================================================================
   multi-leg events NOT flagged MECE  : 5,103  <- L2/L3/L4 link candidates
   by category: {'Sports': 2134, 'Elections': 1162, 'Financials': 566, 'Entertainment': 328, 'Economics': 295, 'Politics': 255, 'Science and Technology': 94, 'Climate and Weather': 86, 'Crypto': 60, 'Companies': 54}
