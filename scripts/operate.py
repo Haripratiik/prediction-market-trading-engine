@@ -29,6 +29,7 @@ one poll, from any state.
 from __future__ import annotations
 
 import argparse
+import math
 import signal
 import threading
 import time
@@ -51,7 +52,13 @@ class Task:
     name: str
     every_s: float
     run: Callable[[], str]
-    last_run: float = 0.0
+    # NEVER RUN, and it must not be spelled 0.0.  `time.monotonic()` has an
+    # arbitrary origin -- on Windows it is seconds since boot -- so `now - 0.0`
+    # is the machine's uptime, not the age of this task.  With the old default a
+    # task whose cadence exceeded the uptime was not due, so starting the
+    # supervisor on a freshly booted box silently skipped the 1800s universe
+    # sweep for the first half hour.  Negative infinity is due against any clock.
+    last_run: float = -math.inf
     runs: int = 0
     errors: int = 0
     last_error: str = ""
@@ -164,7 +171,7 @@ class Supervisor:
               flush=True)
         if once:
             for t in self.tasks:
-                t.last_run = -1e9
+                t.last_run = -math.inf
             self.step()
         else:
             while not self._stop:

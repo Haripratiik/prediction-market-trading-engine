@@ -2,7 +2,7 @@
 
 ![Python](https://img.shields.io/badge/Python-3.13-3776AB?style=flat&logo=python&logoColor=white)
 ![SQLite](https://img.shields.io/badge/SQLite-WAL-003B57?style=flat&logo=sqlite&logoColor=white)
-![Tests](https://img.shields.io/badge/tests-1133%20passing-2ea44f?style=flat)
+![Tests](https://img.shields.io/badge/tests-1134%20passing-2ea44f?style=flat)
 ![Data](https://img.shields.io/badge/dataset-7.5M%20rows-blue?style=flat)
 ![Venue](https://img.shields.io/badge/venue-Kalshi%20(CFTC%20DCM)-0A0A0A?style=flat)
 
@@ -13,7 +13,7 @@ The engine enumerates a 138,000 market universe, forms and risk checks multi-leg
 It was then pointed at the hardest question in the space: **is there a retail-accessible edge on Kalshi?** Seven candidate strategies were tested to destruction across 4,258 settled markets. The results below quantify precisely how efficient this venue is, and where the money that does exist actually goes.
 
 ```
-23,000 lines of engine, strategy and research    1,133 offline tests, 17 live
+23,000 lines of engine, strategy and research    1,134 offline tests, 17 live
 14,000 lines of tests                            138,193 distinct markets
 7.5M rows of live venue data                     99.6% candle coverage
 ```
@@ -136,7 +136,7 @@ The candle backfill is what made statistical power possible. `/series/{s}/market
 
 ```bash
 pip install -e .
-python -m pytest -m "not live"          # 1133 offline tests
+python -m pytest -m "not live"          # 1134 offline tests
 python -m pytest -m live                # 17 tests against the public API
 
 python -m scripts.operate               # the whole pipeline, unattended

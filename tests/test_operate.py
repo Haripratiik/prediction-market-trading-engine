@@ -88,6 +88,20 @@ def test_each_task_keeps_its_own_cadence(run_dir):
     assert calls["slow"] == 1, "a long-cadence task ran more than once"
 
 
+def test_a_task_that_has_never_run_is_due_against_any_clock():
+    """The regression that made the suite depend on system uptime.
+
+    `time.monotonic()` has an arbitrary origin; on Windows it is seconds since
+    boot. With `last_run` defaulting to 0.0, `due(now)` asked whether the
+    MACHINE had been up longer than the cadence, so a supervisor started on a
+    fresh boot skipped its 1800s universe sweep for the first half hour, and
+    this file's cadence test passed or failed depending on the host's uptime.
+    """
+    t = Task("never", 1800.0, lambda: "")
+    for clock in (0.0, 1.0, 300.0, 1799.0, 9_509.0, 1e9):
+        assert t.due(clock), f"a task that has never run must be due at {clock}"
+
+
 def test_a_task_is_due_only_after_its_interval_elapses():
     t = Task("x", 10.0, lambda: "")
     t.last_run = 100.0
