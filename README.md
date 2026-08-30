@@ -10,7 +10,7 @@
 
 The engine enumerates a 138,000 market universe, forms and risk checks multi-leg arbitrage structures, executes through a declarative diff-based order manager with idempotency guarantees and a five-second kill switch, materialises counterfactual fills against the real trade tape, ingests settlements, and produces a KPI digest with confidence intervals.
 
-It was then pointed at the hardest question in the space: **is there a retail-accessible edge on Kalshi?** Seven candidate strategies were tested to destruction across 4,258 settled markets. The results below quantify precisely how efficient this venue is, and where the money that does exist actually goes.
+It was then pointed at one question: **is there a retail-accessible edge on Kalshi?** Seven candidate strategies were tested to destruction across 4,258 settled markets. The results below quantify precisely how efficient this venue is, and where the money that does exist actually goes.
 
 ```
 23,000 lines of engine, strategy and research    1,134 offline tests, 17 live
@@ -24,15 +24,15 @@ It was then pointed at the hardest question in the space: **is there a retail-ac
 
 **Kalshi is calibrated, measured about as tightly as public data allows.** 4,258 settled markets, 1.39 million one-minute candles, one observation per market taken strictly before settlement. Eighteen category and lead cells spanning Sports, Crypto, Financials, Commodities, Weather, Economics, Mentions and Entertainment at 30-minute, 2-hour and 24-hour horizons. **Not one survives Bonferroni correction once observations are clustered by event.** Skill scores run +0.21 to +0.74, so these markets are genuinely informative and not merely unbiased. Backfill coverage is 99.6 percent, so the sample is the population.
 
-**The quote process mean reverts, and the spread is priced to capture exactly all of it.** Negative autocorrelation is robust at t = -21 and survives the bid-ask bounce test on a single side of the book, so it is real rather than quote flicker. The predicted reversion scales cleanly with move size across two orders of magnitude, from 0.12c after a 1c move to 4.45c after a 20c move. **The spread stays 4 to 8 times larger in every single band.** The reversion is the market maker's compensation, and seeing the two track that tightly is what efficiency looks like from the inside.
+**The quote process mean reverts, and the spread is priced to capture exactly all of it.** Negative autocorrelation is robust at t = -21 and survives the bid-ask bounce test on a single side of the book, so it is real and not quote flicker. The predicted reversion scales cleanly with move size across two orders of magnitude, from 0.12c after a 1c move to 4.45c after a 20c move. **The spread stays 4 to 8 times larger in every single band.** The reversion is the market maker's compensation, and seeing the two track that tightly is what efficiency looks like from the inside.
 
-**Order flow is informed, and the spread does not cover it.** Measured on 429,335 trades across 534 markets, clustered by market: the mid moves **+1.94c in the taker's direction within one minute** of their print, t = +11.0, and the move persists at 5 and 30 minutes rather than decaying, which makes it permanent impact rather than a liquidity cost. Against a mean half-spread of 1.43c, that puts the passive market maker at **-0.51c per contract before fees**, and makers pay zero fees on 13,412 of 13,545 series, so there is nothing left to recover it. This is the mechanism behind the market-making result below, measured directly rather than cited.
+**Order flow is informed, and the spread does not cover it.** Measured on 429,335 trades across 534 markets, clustered by market: the mid moves **+1.94c in the taker's direction within one minute** of their print, t = +11.0, and the move persists at 5 and 30 minutes instead of decaying, which makes it permanent impact and not a liquidity cost. Against a mean half-spread of 1.43c, that puts the passive market maker at **-0.51c per contract before fees**, and makers pay zero fees on 13,412 of 13,545 series, so there is nothing left to recover it. This is the mechanism behind the market-making result below, measured here directly.
 
-Measuring it correctly is the whole trick. Marking a taker's fill price against a later mid charges them half the spread by construction and reports a number about the spread rather than about information. Measuring the change in the mid isolates the information content of the flow, and reverses the conclusion.
+Measuring it correctly is the whole trick. Marking a taker's fill price against a later mid charges them half the spread by construction and reports a number about the spread, not about information. Measuring the change in the mid isolates the information content of the flow, and reverses the conclusion.
 
 **The one real anomaly is a tick-size artifact, not a behavioural bias.** Longshots lose heavily. Pooled side-neutrally across 1,148 settled tickers, contracts bought between 1c and 10c return **-72.2%** on 19.5 million contracts, and the gradient runs monotonically to +3.0% at 91-99c, reproducing the published Kalshi favourite-longshot result on 2026 data. The mechanism is the **price floor**: 1c contracts win 0.006 percent against an implied 1.0 percent, a 167x gap that falls to 39x by 5c and 1.9x by 8c. A contract whose true probability is six thousandths of one percent cannot be quoted below one cent, so it is mechanically overpriced with no trader error required.
 
-Selling into it is profitable in the data and is bounded by capital rather than by edge. Size weighted across non-index markets, selling everything in the 1-7c band returns **+3.23% on locked collateral** and the 8-15c band **+4.58%**, while the 26-40c band **loses 5.00%**, so the profit is specific to the floor-bound region rather than a general longshot effect.
+Selling into it is profitable in the data and is bounded by capital rather than by edge. Size weighted across non-index markets, selling everything in the 1-7c band returns **+3.23% on locked collateral** and the 8-15c band **+4.58%**, while the 26-40c band **loses 5.00%**, so the profit is specific to the floor-bound region and is not a general longshot effect.
 
 Two things keep this from being a strategy. It needs **$14.9M of collateral** to capture $482k, and at any realistic size you are competing to be the seller in trades that already have one. And the sample has not yet paid its tail: the 1-7c band paid out $20,604 against $503,137 collected, so the loss branch is 4 percent realised, which is exactly the shape that looks excellent right up until it does not.
 
@@ -68,19 +68,19 @@ Seven strategies, each closed on a number rather than an argument. The mechanism
 | Weather forecasting | market wins | Market-implied error sd **1.95F** beats the best forecast buildable from free public data at **2.19F**, at matched lead |
 | Passive market making | negative before fees | Adverse selection **1.94c** against a **1.43c** half-spread, so **-0.51c per contract**. Every volume band above 1k has a 1 cent median spread |
 
-The mechanism behind the first generalises, and is the most useful single sentence here: **the margin gate selects books whose ask is rich precisely because nobody is buying it.** 67.5 percent of legs saw zero qualifying taker flow in 43 minutes, and median queue ahead was 2,249 contracts against an order size of 58.
+The mechanism behind the first generalises: **the margin gate selects books whose ask is rich precisely because nobody is buying it.** 67.5 percent of legs saw zero qualifying taker flow in 43 minutes, and median queue ahead was 2,249 contracts against an order size of 58.
 
 ---
 
 ## The statistical protocol
 
-Every candidate edge that appeared during development was run through the same destruction protocol before it was allowed to reach a conclusion. Bias in a backtest runs in one direction, so the protocol is built to attack the result rather than to confirm it.
+Every candidate edge that appeared during development was run through the same destruction protocol before it was allowed to reach a conclusion. Bias in a backtest runs in one direction, so the protocol is built to attack the result instead of confirming it.
 
 **The independence unit is chosen before the test, and it is almost never the row.** A quoting loop re-evaluating one ticker generates hundreds of correlated rows across a handful of markets, and an e-process reads that as overwhelming evidence, E = 124,326 against a threshold of 20. Leg-scoring a mutually exclusive basket reports a 77.8 percent win rate when exactly one leg pays, because an n-leg short "wins" (n-1)/n by arithmetic; per structure it is 12.5 percent, and confidence intervals computed on legs are 1.9 times too narrow. 1,327 sports markets span only 226 games, and clustering by game takes a z of +2.47 down to +1.46. Everything reported above is clustered at the unit that actually varies independently, then Bonferroni corrected.
 
 **Confidence intervals are not trusted until the tail is in the sample, and a rebuttal is not a hypothesis test.** Selling longshots showed a 95 percent CI of [+0.0063, +0.0375] excluding zero. The sample standard deviation was small only because the loss branch had not occurred yet, so on any payoff with rare large losses the correct instrument is a binomial test against the calibrated null: P(zero losses given calibration) = 0.638, and the claimed edge is refused. Refusing one strategy's edge is a different question from whether the bias exists, and separating the two is what produced the tick-floor result above. **A null from an underpowered test is not a finding**, so every claim here is stated alongside the power that produced it.
 
-**The instrument is measured before the market is.** A dislocation result worth $44 per hour collapses to $3.31 once every leg is required to have actually refreshed since the previous observation, which is enforced rather than assumed.
+**The instrument is measured before the market is.** A dislocation result worth $44 per hour collapses to $3.31 once every leg is required to have actually refreshed since the previous observation, which is enforced in code, not assumed.
 
 **The leakage suite has a control.** A deliberately cheating strategy is checked into the suite and the detector has to catch it, because a leakage detector that only ever sees clean strategies has never been tested.
 
@@ -90,7 +90,7 @@ Every candidate edge that appeared during development was run through the same d
 
 Three findings about Kalshi's public infrastructure that are not in its documentation and that materially change what can be measured.
 
-**The public API is CloudFront-fronted.** `api.elections.kalshi.com` serves cached bodies with an `age` header up to 13 seconds, so a naive "15 second market grid" is measuring a CDN TTL rather than the market. A unique query parameter forces a cache miss and doubles the observed resolution.
+**The public API is CloudFront-fronted.** `api.elections.kalshi.com` serves cached bodies with an `age` header up to 13 seconds, so a naive "15 second market grid" is measuring a CDN TTL and not the market. A unique query parameter forces a cache miss and doubles the observed resolution.
 
 **The WebSocket wire format contradicts the documentation.** The published schema specifies integer cents; the wire sends fixed-point dollar strings. A parser written faithfully to the docs reads empty books and reports nothing wrong.
 
@@ -114,7 +114,7 @@ Four processes with one contract between them: the database is the truth, risk i
 | Execution | [execution/](execution/) | Declarative diff-based executor, OMS with idempotency keys minted before the network call, kill switch, structure lifecycle with orphan detection |
 | Analysis | [backtest/](backtest/) [monitor/](monitor/) | Three fill models reported as a bracket, leakage suite with a known cheating strategy as its control, mark-out recorder, structure-level validation harness |
 
-**Invariants that are enforced rather than documented.** Position is derived from terminal fills and never from a counter. Every order carries an idempotency key minted before the network call, so a crash mid-send cannot double fill. Multi-leg structures are atomic: if the risk engine denies one leg, every leg is dropped, because a partially placed hedge is a naked directional bet wearing an arbitrage's clothes. Sizing contracts are checked by the engine rather than described in a comment, so a 21-leg short collecting $11.06 against $21 of liability cannot be placed.
+**Invariants that are enforced rather than documented.** Position is derived from terminal fills and never from a counter. Every order carries an idempotency key minted before the network call, so a crash mid-send cannot double fill. Multi-leg structures are atomic: if the risk engine denies one leg, every leg is dropped, because a partially placed hedge is a naked directional bet wearing an arbitrage's clothes. Sizing contracts are checked by the engine instead of described in a comment, so a 21-leg short collecting $11.06 against $21 of liability cannot be placed.
 
 ---
 
