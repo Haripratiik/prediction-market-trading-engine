@@ -762,6 +762,11 @@ class SqliteBookEventSink:
         self.conn = sqlite3.connect(str(self.path), check_same_thread=False)
         self.conn.execute("PRAGMA journal_mode=WAL")
         self.conn.execute("PRAGMA synchronous=NORMAL")
+        # check_same_thread=False hands this connection to several threads, and WAL
+        # lets a writer run alongside readers -- but only one writer. Without a busy
+        # timeout the second one does not wait, it raises "database is locked"
+        # immediately. Five seconds is longer than any statement here takes.
+        self.conn.execute("PRAGMA busy_timeout=5000")
         self.conn.executescript(BOOK_EVENTS_DDL)
         self.conn.commit()
         self.flush_every = flush_every

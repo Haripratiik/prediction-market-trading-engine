@@ -300,6 +300,11 @@ class Database:
         self.conn.execute("PRAGMA journal_mode=WAL")
         self.conn.execute("PRAGMA foreign_keys=ON")
         self.conn.execute("PRAGMA synchronous=NORMAL")
+        # check_same_thread=False hands this connection to several threads, and WAL
+        # lets a writer run alongside readers -- but only one writer. Without a busy
+        # timeout the second one does not wait, it raises "database is locked"
+        # immediately. Five seconds is longer than any statement here takes.
+        self.conn.execute("PRAGMA busy_timeout=5000")
         self.migrate()
 
     # Columns added after v1.  `CREATE TABLE IF NOT EXISTS` is a no-op against a
@@ -379,6 +384,16 @@ class Database:
             raise
 
     def close(self) -> None:
+        # Fold the WAL back into the database before letting go. Autocheckpoint
+        # only fires when a writer commits and no reader is holding an older
+        # snapshot, so a long-lived reader can starve it indefinitely and the
+        # -wal file grows without bound -- it has reached multiples of the
+        # database size here. TRUNCATE resets it to zero on the way out.
+        try:
+            self.conn.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+        except sqlite3.Error:
+            # A checkpoint is housekeeping. Never let it stop a close.
+            pass
         self.conn.close()
 
     def __enter__(self) -> "Database":
